@@ -1,1 +1,0 @@
-Images to be embedded in the article
