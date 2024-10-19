@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="/assets/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Data Visualization, Data Science and AI" /></head>
+<body class="container" style="background-color:ghostwhite;"><header><!--</header> class="site-header" role="banner" style="background-color: white">-->
+  <div class="wrapper mb-2"><a class="site-title" style="font-size: larger;" rel="author" href="https://datavizandai.github.io">Data Visualization, Data Science and AI</a>
+    <a class="site-nav" rel="author" href="/about">About</a>
+  </div>
+</header><main class="container" aria-label="Content">
+      <div >
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">How to Build a Private AI Agent with Ollama and LlamaIndex</h1>
+    <h3>Running a local LLM is a no-cost alternative to using commercial APIs</h3>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2024-10-18T00:00:00+02:00" itemprop="datePublished">Oct 18, 2024
+      </time></p>
+  </header>
+
+  <div class="row">
+    <div class="col-sm-9">
+      <div class="post-content e-content" itemprop="articleBody">
+        <p><img src="/assets/images/llamaindex/db5withllama.png" alt="" /></p>
+
+<p><em>Image by author with a little help from Microsoft Bing Image Creator (Ok, ok… a  lot of help)</em></p>
+
+<p>Running an LLM locally with Ollama is not difficult and implementing an agent with LlamaIndex is also straightforward. But don’t expect the same performance you get from Anthropic, OpenAI or Google.</p>
+
+<p>Industrial strength AI runs on powerful servers with lots of resources. Nothing that lives on your desk can compete with that sort of power, so while we will attempt to implement something interesting and, hopefully, useful that will run on your day-to-day laptop, don’t expect miracles.</p>
+
+<p>We’ll use Ollama to run a local LLM. It’s not the only choice, for example, <em>LM Studio</em> and <em>GPT4All</em> are possible alternatives, but Ollama works nicely with LlamaIndex, so we’ll go with that.</p>
+
+<p>Likewise, LlamaIndex is not the only way to implement an AI agent but it’s pretty easy. I’ve already explored other alternatives: <a href="https://medium.com/towards-data-science/ai-agents-vs-ai-pipelines-a-practical-guide-to-coding-your-llm-application-167e3c9a654c">AI Agents vs. AI Pipelines: A Practical Guide to Coding Your LLM Application</a>, which is based on <em>CrewAI</em>, and <a href="https://medium.com/ai-advances/how-to-build-a-react-ai-agent-with-claude-3-5-and-python-95423f798640">How to Build a ReAct AI Agent with Claude 3.5 and Python</a>, which is a DIY approach - now it’s someone else’s turn.</p>
+
+<h3 id="ollama">Ollama</h3>
+
+<p>Ollama lets you run an LLM on your local machine. You can choose which model you want to run and Ollama will download and run it.  The first thing to do is get yourself over to the <a href="https://ollama.com/">Ollama website</a>, download it and install it - just follow the instructions for your operating system.</p>
+
+<p>When you’ve done that open a terminal, or command window, and type in the command to run Ollama, e.g.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ollama run gemma2:2b
+</code></pre></div></div>
+
+<p>This runs Ollama using Google’s <em>gemma2:2b</em>  which is the smallest of the Gemma models and seems to run OK on a machine with 8 gigabytes of RAM. If you don’t already have that particular model locally, then Ollama will download it. When Ollama is running you are presented with a command prompt. There are several commands available, for example,  the command, <code class="language-plaintext highlighter-rouge">pull,</code>will download a new model - check out the <a href="https://ollama.com/library">Ollama library</a> web page to select a model. And look at the <a href="[GitHub - ollama/ollama: Get up and running with Llama 3.2, Mistral, Gemma 2, and other large language models.](https://github.com/ollama/ollama)">Ollama GitHub page</a> for more details and commands.</p>
+
+<p>The command line is an interface to the LLM. Here is an example of an interaction with the LLM from the command line.</p>
+
+<blockquote>
+  <p><strong>»&gt;Please list the presidents of the USA since 1990</strong></p>
+
+  <p>Here are the presidents of the United States since 1990:</p>
+
+  <ul>
+    <li><strong>George H. W. Bush</strong> (1990-1993)</li>
+    <li><strong>William Jefferson Clinton</strong> (1993-2001)</li>
+    <li><strong>George W. Bush</strong> (2001-2009)</li>
+    <li><strong>Barack Obama</strong> (2009-2017)</li>
+    <li><strong>Donald Trump</strong> (2017-2021)</li>
+    <li><strong>Joe Biden</strong> (2021-Present)</li>
+  </ul>
+
+  <p>Let me know if you’d like any more information about these presidents or their presidencies!</p>
+</blockquote>
+
+<p>The first line is my prompt and the rest is the LLM’s response (I’ve put in the emphasis for readability). It’s a good response and it wasn’t as slow as I thought it might be, so we are off to a good start.</p>
+
+<p>To use Ollama in Python you will, of course, need to download the library from PyPi.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>ollama
+</code></pre></div></div>
+
+<p>Once you have done that and it is running you can ensure it works using the following code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">ollama</span>
+
+<span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="n">q</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">ollama</span><span class="p">.</span><span class="nf">chat</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="sh">'</span><span class="s">gemma2:2b</span><span class="sh">'</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="sh">'</span><span class="s">role</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">user</span><span class="sh">'</span><span class="p">,</span>
+        <span class="sh">'</span><span class="s">content</span><span class="sh">'</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">])</span>
+    <span class="nf">return </span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="sh">'</span><span class="s">message</span><span class="sh">'</span><span class="p">][</span><span class="sh">'</span><span class="s">content</span><span class="sh">'</span><span class="p">])</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="nf">query</span><span class="p">(</span><span class="sh">"</span><span class="s">Why did the chicken cross the road</span><span class="sh">"</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>The LLM will respond with a message something like the following.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To get to the other side! 🐔😄
+
+This is a classic joke! It's simple, silly, and always 
+a fun way to start a conversation.  
+Do you want to try telling another one? 😉
+</code></pre></div></div>
+
+<p>OK, now we are up and running. Let’s take a look at how we are going to implement a local agent.</p>
+
+<h3 id="agents">Agents</h3>
+
+<p>Agents are LLMs that have access to external tools and can make decisions on how to use those tools to provide a solution to a problem. They typically run in a loop <em>thinking</em> step by step about how they should address a problem and which tools they need to invoke at each step.</p>
+
+<p><img src="https://datavizandai.github.io/assets/images/agentpipeline/reactflow.png" alt="" /></p>
+
+<p><em>An AI agent flow chart</em></p>
+
+<p>I’ve explored the use of agents in the articles I referred to above, this time I will demonstrate the use of LlamaIndex agents. We don’t need to go into the implementation but it might be useful to look at the prompt that is used to implement LlamaIndex agents as this is where much of the work is done.</p>
+
+<p>We’ll look at the prompt a section at a time to work out just what is going on. (To be clear, LlamaIndex code is open-sourced under the <a href="[GitHub - ollama/ollama: Get up and running with Llama 3.2, Mistral, Gemma 2, and other large language models.](https://github.com/ollama/ollama?tab=MIT-1-ov-file#readme)">MIT licence</a> so we are permitted to use it pretty much how we like and we can reproduce it here.)</p>
+
+<p>The prompts used in LlamaIndex code are implemented as templates, that is strings that contain placeholders for variable inputs (e.g. the names of tools that are provided to the agent). The prompt that we will examine here is the <em>system</em> prompt for a ReAct agent[1]. It is formatted as a Markdown document and starts with a very broad aim.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You are designed to help with a variety of tasks, from answering 
+questions to providing summaries to other types of analyses.
+</code></pre></div></div>
+
+<p>The prompt is then broken down into several sections. The first tells the LLM what tools are available to it.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gu">## Tools</span>
+
+You have access to a wide variety of tools. You are responsible for using
+the tools in any sequence you deem appropriate to complete the task at 
+hand but you should always use a tool if you are able in order to find 
+information. This may require breaking the task into subtasks and using 
+different tools to complete each subtask.
+
+You have access to the following tools:
+{tool_desc}
+</code></pre></div></div>
+
+<p>As you can see the LLM is told how to use the tools and <code class="language-plaintext highlighter-rouge">{tool_desc}</code>will be replaced with a list of the tool descriptions.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gu">## Output Format</span>
+
+Please answer in the same language as the question but and use the following format:
+
+  Thought: The current language of the user is: (user's language). I need to use a tool to help me answer the question.
+  Action: tool name (one of {tool_names}) if using a tool.
+  Action Input: the input to the tool, in a JSON format representing the kwargs (e.g. input)
+
+  Please ALWAYS start with a Thought.
+
+  NEVER surround your response with markdown code markers. You may use code markers within your response if you need to.
+
+  Please use a valid JSON format for the Action Input. Do NOT do this input.
+
+  If this format is used, the user will respond in the following format:
+
+  Observation: tool response
+
+  You should keep repeating the above format till you have enough information to answer the question without using any more tools. At that point, you MUST respond in the one of the following two formats:
+
+  Thought: I can answer without using any more tools. I'll use the user's language to answer
+  Answer: [your answer here (In the same language as the user's question)]
+
+  Thought: I cannot answer the question with the provided tools.
+  Answer: [your answer here (In the same language as the user's question)]
+</code></pre></div></div>
+
+<p>This section describes the <em>Thought</em>, <em>Action</em>, <em>Observation</em>, <em>Answer</em> sequence which are the steps the agent goes through to arrive at a solution and specifies the format in which the LLM should respond.</p>
+
+<p>Finally, the prompt tells the LLM that following this system prompt will be the messages that are generated by the user and responded to by the LLM.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gu">## Current Conversation</span>
+
+Below is the current conversation consisting of interleaving human and assistant messages.
+</code></pre></div></div>
+
+<p>These sections are all joined into a single system prompt, which defines the behaviour of the agent.</p>
+
+<h3 id="llamaindex">LlamaIndex</h3>
+
+<p>This brings us to creating an agent in LlamaIndex. LlamaIndex has libraries that implement agents and one of these is the <em>ReactAgent</em> that incorporates the prompt that we saw above. We’ll implement an agent and specify some tools that it can use. Then we’ll see how it performs.</p>
+
+<p>The first thing we need, of course, is to import some libraries.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">llama_index.core.tools</span> <span class="kn">import</span> <span class="n">FunctionTool</span> <span class="c1"># allow function use
+</span><span class="kn">from</span> <span class="n">llama_index.llms.ollama</span> <span class="kn">import</span> <span class="n">Ollama</span>      <span class="c1"># the Ollama library
+</span><span class="kn">from</span> <span class="n">llama_index.core.agent</span> <span class="kn">import</span> <span class="n">ReActAgent</span>   <span class="c1"># the agent library
+</span><span class="kn">import</span> <span class="n">wikipedia</span>                                <span class="c1"># the wikipedia library
+</span></code></pre></div></div>
+
+<p>Their use is pretty much self-explanatory: the first lets us define and add tools to the agent, the Ollama library is required so we can easily incorporate our local LLM and, of course, we need the library that allows us to create agents.</p>
+
+<p>We import <em>wikipedia</em> because we are going to build a tool around it.</p>
+
+<p><em>If you would like to follow along and implement the code as a Jupyter Notebook then each code block that I describe here can go into a separate cell. Alternatively, you can concatenate them into a single Python program.</em></p>
+
+<p>We want our agent to have access to tools and so we need to specify functions that implement those tools. Here are a couple.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># define sample Tools
+</span><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">evaluate an expression given in Python syntax</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="nf">eval</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">wikipedia_lookup</span><span class="p">(</span><span class="n">q</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Look up a query in Wikipedia and return the result</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">wikipedia</span><span class="p">.</span><span class="nf">page</span><span class="p">(</span><span class="n">q</span><span class="p">).</span><span class="n">summary</span>
+
+<span class="n">eval_tool</span> <span class="o">=</span> <span class="n">FunctionTool</span><span class="p">.</span><span class="nf">from_defaults</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">evaluate</span><span class="p">)</span>
+<span class="n">wikipedia_lookup_tool</span> <span class="o">=</span> <span class="n">FunctionTool</span><span class="p">.</span><span class="nf">from_defaults</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">wikipedia_lookup</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Here we define two tools: one looks up something on Wikipedia and the other evaluates a Python string. Both take strings as input and return strings as output. The type hints and documentation strings are important as these are used to tell the agent how to use the tools.</p>
+
+<p>A note of caution here: the <code class="language-plaintext highlighter-rouge">evaluate </code>tool is useful and versatile as we can use it to solve mathematical problems - something that LLMs are not great at. However, it is inherently dangerous as it will run any Python code you give it - imagine a set of Python commands that imported the <em>os</em> library, used it to navigate to your root folder and then proceeded to delete all your files. This is not something that we would want to allow unrestricted access to. So, while this particular tool is convenient, it should be used with caution.</p>
+
+<p>Following the tool function definitions, we need to create LlamaIndex tools to use them. I’ve named these <code class="language-plaintext highlighter-rouge">eval_tool</code> and <code class="language-plaintext highlighter-rouge">wikipedia_lookup_tool</code>. We will see how we inform the agent about them, shortly. Before that, we can do that we need to create an agent.</p>
+
+<p>But first, we set up the LLM.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># initialize llm
+</span><span class="n">llm</span> <span class="o">=</span> <span class="nc">Ollama</span><span class="p">(</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="sh">"</span><span class="s">gemma2:2b</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">request_timeout</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>We call this <code class="language-plaintext highlighter-rouge">llm</code> and it is the result of a call to <code class="language-plaintext highlighter-rouge">Ollama</code> from the Ollama library. In that call, we specify the model we will use (this should be the same as the one we’ve set running from the command line - obviously!), we set a timeout (2 hours! Things don’t normally take that long so you can make it much shorter if you want to) and we also set the <code class="language-plaintext highlighter-rouge">temperature </code>which is a measure of the randomness, or creativity, of the LLM’s response. A value of 0 gives you the least randomness and the most consistency but you may want to change this depending on the sort of work that you are doing.</p>
+
+<p>Now we can create the agent that uses the LLM and the tools we have just defined.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">agent</span> <span class="o">=</span> <span class="n">ReActAgent</span><span class="p">.</span><span class="nf">from_tools</span><span class="p">([</span><span class="n">eval_tool</span><span class="p">,</span> <span class="n">wikipedia_lookup_tool</span><span class="p">],</span> 
+<span class="err">                                </span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>That is all there is to creating an agent with Llamaindex. We give it a list of tools, the LLM and set <code class="language-plaintext highlighter-rouge">verbose </code>to <code class="language-plaintext highlighter-rouge">True</code>. This means that we will get a lot of feedback from the agent. As you might expect, you will get less feedback if you set it to <code class="language-plaintext highlighter-rouge">False</code>.</p>
+
+<p>And there we are! Ready to run.</p>
+
+<p>Let’s give it a try.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="p">.</span><span class="nf">chat</span><span class="p">(</span><span class="sh">"</span><span class="s">What is the population of the capital of France</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>A simple request that will invoke a call to the Wikipedia tool, get the information required,  and then print out the result.</p>
+
+<p>Here is an abbreviated readout of the session.</p>
+
+<blockquote>
+  <p>Running step dc619f8e-45ca-4cfc-8bd1-50ed2b9e64ea.</p>
+
+  <p><strong>Step input</strong>: What is the population of the capital of France</p>
+
+  <p><strong>Thought</strong>: The current language of the user is: English. I need to use a tool to help me answer the question.</p>
+
+  <p><strong>Action</strong>: wikipedia_lookup</p>
+
+  <p><strong>Action Input</strong>: {‘q’: ‘Paris’}</p>
+
+  <p><strong>Observation</strong>: Paris (French pronunciation: [paʁi] ) is the capital and largest city of France. With an official estimated population of 2,102,650 residents in January 2023 in an area of more than 105 km2 (41 sq mi)…</p>
+
+  <p><em>(lots more about Paris here)</em></p>
+
+  <p>…Tour de France bicycle race finishes on the Avenue des Champs-Élysées in Paris.</p>
+
+  <p>Running step d7d0c129-dfe1-45a5-9db0-81e43ca6debf.</p>
+
+  <p><strong>Step input</strong>: None</p>
+
+  <p><strong>Thought</strong>: I can answer the question without using any more tools.</p>
+
+  <p><strong>Answer</strong>: The population of the capital of France, Paris, is estimated to be around 2,102,650 residents.</p>
+</blockquote>
+
+<p>I’ve highlighted the stages that it has worked through like a good little agent, so you can easily see its ‘thought process’. You can see how it has chosen a tool, called it and used the response to work out the answer to the question.</p>
+
+<p>Next, we have a simple use of the <code class="language-plaintext highlighter-rouge">eval </code>tool.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="p">.</span><span class="nf">chat</span><span class="p">(</span><span class="sh">"""</span><span class="s">What is 2 * (5 + (6 * 4))</span><span class="sh">"""</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>We are asking the agent to solve a simple arithmetic expression and it does exactly that.</p>
+
+<blockquote>
+  <p>Running step c8347df9-10c7-4d34-8b78-2540521e6e7b.</p>
+
+  <p><strong>Step input</strong>: What is 2 * (5 + (6 * 4))</p>
+
+  <p><strong>Thought</strong>: I need to use the evaluate tool to calculate this expression.</p>
+
+  <p><strong>Action</strong>: evaluate</p>
+
+  <p><strong>Action Input</strong>: {‘inp’: ‘2 * (5 + (6 * 4))’}</p>
+
+  <p><strong>Observation</strong>: 58</p>
+
+  <p>Running step 58981d08-1b5d-4658-80e5-21ecb4503665.</p>
+
+  <p><strong>Step input</strong>: None</p>
+
+  <p><strong>Thought</strong>: The answer is 58.</p>
+
+  <p><strong>Answer</strong>: 58</p>
+</blockquote>
+
+<p>The agent simply extracts the expression from the input and passes it to the tool for evaluation.</p>
+
+<p>We’ve done what we set out to do - we have a locally running LLM and a pattern for how we can use it programmatically with LlamaIndex agents. But let’s go just a little bit further.</p>
+
+<p>With this simple set up we can even create a basic workflow.</p>
+
+<h3 id="a-simple-workflow">A simple workflow</h3>
+
+<p>LlamaIndex provides support for workflows within its framework and you can also use other frameworks such as LangChain, or CrewAI, to do the same thing.</p>
+
+<p>These products give you very sophisticated ways of orchestrating flows between agents and tools. But if you use a single agent with a simple linear flow, a workflow boils down to a list of prompts and a loop.</p>
+
+<p>Here is an example of a workflow that consists of two prompts. It is a tool for creating summaries of information suitable for kids. The agent will look up a subject in Wikipedia, construct a summary of that information, and, finally, rewrite it using language that is good for a young reader.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># A crude workflow
+</span><span class="k">def</span> <span class="nf">kids_query</span><span class="p">(</span><span class="n">subject</span><span class="p">):</span>
+    <span class="n">prompts</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="sh">"""</span><span class="s">Find out about </span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s"> and summarize your findings 
+                   in about 100 words and respond with that summary</span><span class="sh">"""</span><span class="p">,</span>
+               <span class="sh">"""</span><span class="s">Re-write your summary so that it is suitable for a 
+                  7-year old reader</span><span class="sh">"""</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prompts</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="p">.</span><span class="nf">chat</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span> <span class="c1"># return the last response
+</span></code></pre></div></div>
+
+<p>It’s a simple function definition that incorporates a list of two prompts. The first instructs the agent to look up a topic and produce a 100-word summary. The second prompt tells the agent to re-write the summary in language aimed at a 7-year-old reader. The topic to look up is set as a parameter so we can write any topic in there and inform our young reader of a whole range of subjects.</p>
+
+<p>We run through a loop to send each prompt to the agent. The response from the agent is recorded in the variable <code class="language-plaintext highlighter-rouge">response</code> and the last of these responses is passed back as the return value.</p>
+
+<p>Here is an example.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="nf">kids_query</span><span class="p">(</span><span class="sh">"</span><span class="s">Madrid</span><span class="sh">"</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>This results in the following.</p>
+
+<blockquote>
+  <p>Running step 5489cdff-2845-424e-8cca-56d2a7b5da17.</p>
+
+  <p><strong>Step input</strong>: Find out about Madrid and summarize your findings in about 100 words and respond with that summary.</p>
+
+  <p><strong>Thought</strong>: (Implicit) I can answer without any more tools!</p>
+
+  <p><strong>Answer</strong>: Madrid is the capital of Spain, a vibrant city known for its rich history, art…</p>
+
+  <p><em>more stuff about Madrid, here</em></p>
+
+  <p>Running step d5ecf385-6846-4e40-b244-5c84c731f9b4.</p>
+
+  <p><strong>Step input</strong>: Re-write your summary so that it is suitable for a 7-year old reader</p>
+
+  <p><strong>Thought</strong>: (Implicit) I can answer without any more tools!</p>
+
+  <p><strong>Answer</strong>: Madrid is like a big city with lots of cool stuff! It has fancy palaces and museums where you can see amazing paintings and sculptures. You can even go dancing in the evening! Madrid also has yummy food, just like your favorite pizza place! It’s a fun place to visit!</p>
+</blockquote>
+
+<p>This is simple and I hope that you can see that using a parameterised function makes the workflow more easily generalisable. Imagine now if the agent is passed as a parameter, too.  Your program would then be able to use multiple agents. And if we also passed in the list of prompts, we would be well on our way to constructing our own multi-agent framework.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>Of course, a locally running LLM is not going to be as powerful as one supplied online by one of the big players. But I hope that I have demonstrated that a local LLM is pretty easy and could be useful. If, for example, you want to incorporate private data into your app and are nervous about them being uploaded to an external website then this might be a way forward for you.</p>
+
+<p>You have to bear in mind that a local LLM will use a lot of resources and while it is working you may well notice that your laptop slows down. Also, as you might expect, things take longer. It might take a minute or so to respond to the simple prompts I’ve demonstrated here. To do any sort of data analysis is also slow (that is why I set the timeout to 2 hours!). I haven’t included any data analysis examples here because I have not been satisfied with the results I have obtained, so far - maybe next time.</p>
+
+<hr />
+
+<p>Thanks for reading, I hope that this article has been useful. All code and examples are available in my <a href="https://github.com/alanjones2/llamaindexapps">Github repo</a> -  feel free to download them.
+To be informed when I publish articles please subscribe to my occasional <a href="technofile.substack.com">newsletter </a>or follow me on <a href="https://medium.com/@alan-jones/subscribe">Medium </a>(if you are a member).</p>
+
+<h3 id="notes-and-references">Notes and references</h3>
+
+<ol>
+  <li>Shunyu Yao, et al, ReAct: Synergizing Reasoning and Acting in Language Models, The Eleventh International Conference on Learning Representations (ICLR), 2023. (retrieved from https://arxiv.org/pdf/2210.03629, 27/06/2024)</li>
+</ol>
+
+<p>All images and illustrations are by me the author unless otherwise noted.</p>
+
+<p><em>Disclaimer: I have no connection or commercial interest in any of the companies mentioned in this article.</em></p>
+
+      </div>
+    </div>
+    <div class="col-sm-3">
+      Sponsored content
+    <!--ads etc here -->
+    <!-- streamlit from scratch-->
+    <div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+        <div>
+            <i>eBook</i>
+            <img class="mr-3" src="" width='80%' height='auto' alt="">
+            <h5>
+                <a href="https://alanjones2.github.io/streamlitfromscratch/" target="_blank">
+                    <span class="text-dark">Streamlitfrom Scratch</span>
+                </a>
+            </h5>
+            <p><b>Streamlit</b> is a framework for creating Data Science apps in Python.
+                <br />
+                <b>Streamlit from Scratch</b> is an ebook that will teach you how to get started with
+                Streamlit.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- google add start-->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+        crossorigin="anonymous"></script>
+    <!-- sfs vertical -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    <!-- google add end-->
+
+
+    <!-- how charts work-->
+    <div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+        <div>
+            <i>Sponsored content</i>
+            <img class="mr-3" src="https://m.media-amazon.com/images/I/61y5lxsc9DL._SY466_.jpg" width='80%'
+                height='auto' alt="">
+            <h5 class="mt-0">
+                <a href="https://amzn.to/47FKuiz" target="_blank">
+                    <span class="text-dark">How Charts Work: Understand and explain data with
+                        confidence</span>
+                </a>
+            </h5>
+            <h6>From the Back Cover</h6>
+            <p>
+                How Charts Work brings the secrets of effective data visualisation in a way that will
+                help you bring data alive.
+                Charts, graphs and tables are essential devices in business, but all too often they
+                present information poorly.
+                This
+                book will help you:
+
+                <li>Feel confident understanding different types of charts, graphs and tables – and how
+                    to read them</li>
+                <li>Recognise the true story behind the data presented and what the information really
+                    shows</li>
+                <li>Know the principles and rules of how best to represent information so you can create
+                    your own
+                    information-driven (and
+                    beautiful) visuals</li>
+                <li>Design visuals that people engage with, understand and act upon</li>
+            </p>
+
+        </div>
+    </div>
+    <!-- google add start-->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+        crossorigin="anonymous"></script>
+    <!-- sfs vertical -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    <!-- google add end-->
+
+    <!-- the art of statistics-->
+    <div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+        <div>
+            <i>Sponsored content</i>
+            <img class="mr-3" src="https://m.media-amazon.com/images/I/61eFjiH7sIL._SY264_BO1,204,203,200_QL40_ML2_.jpg"
+                width='80%' height='auto' alt="">
+            <h5 class="mt-0">
+                <a href="https://amzn.to/3kVBGmo" target="_blank">
+                    <span class="text-dark">The Art of Statistics: How to Learn from Data</span>
+                </a>
+            </h5>
+            Discover how data literacy is changing the world and gives you a better understanding of
+            life's biggest problems. I have used this book in various articles and found it to be
+            invaluable.
+
+        </div>
+    </div>
+
+    <!-- google add start-->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+        crossorigin="anonymous"></script>
+    <!-- sfs vertical -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    <!-- google add end-->
+
+    <div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+
+        <i>eBook</i>
+        <h5><a href='https://alanjones.gumroad.com/l/auiws' target='_blank'>Plotting with Pandas</a>
+        </h5>
+        <p>
+            <b>Plotting with Pandas: an Introduction to Data Visualization</b> is an ebook that covers basic and
+            statistical plots using Python and Pandas, line and bar charts, scatter plots, pie charts,
+            histograms, box plots, etc.
+        </p>
+
+
+
+    </div>
+
+    <!-- google add start-->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+        crossorigin="anonymous"></script>
+    <!-- sfs vertical -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    <!-- google add end-->
+
+    <!-- storytelling in data-->
+    <div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+        <div>
+            <i>Sponsored content</i>
+            <img class="mr-3" src="https://m.media-amazon.com/images/I/41OonY0kRWL._SX399_BO1,204,203,200_.jpg"
+                width='80%' height='auto' alt="">
+            <h5 class="mt-0">
+                <a href="https://amzn.to/3JmzEFq" target="_blank">
+                    <span class="text-dark">Storytelling with Data: A Data Visualization Guide for
+                        Business</span>
+                </a>
+            </h5>
+            Don't simply show your data - tell a story with it! Storytelling with Data teaches you
+            the fundamentals of data visualization and how to communicate effectively with data. I
+            use this book in the series of articles '12 Essential Visualizations and How to
+            Implement them.
+
+        </div>
+    </div>
+
+    <!-- google add start-->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+        crossorigin="anonymous"></script>
+    <!-- sfs vertical -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    <!-- google add end-->
+
+    <!-- How charts lie -->
+    <div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+        <div>
+            <i>Sponsored content</i>
+            <img class="mr-3" src="https://m.media-amazon.com/images/I/41N21MzfCRL._SX329_BO1,204,203,200_.jpg"
+                width='80%' height='auto' alt="">
+            <h5 class="mt-0">
+                <a href="https://amzn.to/3ZuQO9B" target="_blank">
+                    <span class="text-dark">How Charts Lie: Getting Smarter about Visual
+                        Information</span>
+                </a>
+            </h5>
+            A leading data visualization expert explores the negative - and positive - influences
+            that charts have on our perception of truth. I used this book as the inspiration for
+            'How Not to Lie with Charts'.
+
+        </div>
+    </div>
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+        crossorigin="anonymous"></script>
+    <!-- sfs vertical -->
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+        data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+    <div id="amzn-assoc-ad-d5bf4dcd-55c6-4038-a3d8-ff8bfa49de8a"></div>
+    <script async
+        src="//z-na.amazon-adsystem.com/widgets/onejs?MarketPlace=US&adInstanceId=d5bf4dcd-55c6-4038-a3d8-ff8bfa49de8a"></script>
+
+</div>
+
+  </div><a class="u-url" href="/2024/10/18/ollama-agent.html" hidden></a>
+</article>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+  </body>
+
+</html>
