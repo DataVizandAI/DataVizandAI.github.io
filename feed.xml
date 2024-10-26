@@ -1,4 +1,407 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-10-19T17:19:48+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">How to Build a Private AI Agent with Ollama and LlamaIndex</title><link href="http://localhost:4000/2024/10/18/ollama-agent.html" rel="alternate" type="text/html" title="How to Build a Private AI Agent with Ollama and LlamaIndex" /><published>2024-10-18T00:00:00+02:00</published><updated>2024-10-18T00:00:00+02:00</updated><id>http://localhost:4000/2024/10/18/ollama-agent</id><content type="html" xml:base="http://localhost:4000/2024/10/18/ollama-agent.html"><![CDATA[<p><img src="/assets/images/llamaindex/db5withllama.png" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-10-26T19:45:47+02:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">Hands on Data Visualization with Google Mesop</title><link href="http://localhost:4000/2024/10/26/atavizmesop.html" rel="alternate" type="text/html" title="Hands on Data Visualization with Google Mesop" /><published>2024-10-26T00:00:00+02:00</published><updated>2024-10-26T00:00:00+02:00</updated><id>http://localhost:4000/2024/10/26/atavizmesop</id><content type="html" xml:base="http://localhost:4000/2024/10/26/atavizmesop.html"><![CDATA[<p><img src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/front.png?raw=true" alt="" /></p>
+
+<p>By combining Mesop’s simple yet powerful UI components with Plotly’s comprehensive charting capabilities, you can build a dynamic, interactive app to showcase data visualizations in Python.</p>
+
+<p>Mesop is a Python-native framework developed for rapid AI and web app development that allows you to build sophisticated interfaces without the need for traditional frontend skills; Matplotlib and Plotly are, of course, well-known and well-used graphing libraries.</p>
+
+<p>We’ll take these components and build a data visualization app.</p>
+
+<h2 id="mesop">Mesop</h2>
+
+<p>Mesop is not an officially supported Google product but it is well-documented, used internally within Google and is receiving a fair amount of publicity, so I think we can take it seriously. Mesop is an open-source project licensed under the <a href="https://github.com/google/mesop#Apache-2.0-1-ov-file">Apache-2.0 license</a> [1].</p>
+
+<p>Here is a ‘Hello World’ app in Mesop.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">mesop</span> <span class="k">as</span> <span class="n">me</span>
+
+<span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">app</span><span class="p">():</span>
+  <span class="n">me</span><span class="p">.</span><span class="nf">text</span><span class="p">(</span><span class="sh">"</span><span class="s">Hello World</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><em>Hello World with Mesop</em></p>
+
+<p>As you can see it has a structure with a route defined as a function with a decorator that specifies the endpoint. If you are familiar with Flask, you’ll be at home with Mesop - indeed Mesop is based upon Flask. Look at the Flask equivalent of the code above and you will see the similarities.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="nc">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="sh">'</span><span class="s">/</span><span class="sh">'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">app</span><span class="p">():</span>
+    <span class="k">return</span> <span class="sh">"</span><span class="s">Hello World</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<p><em>Hello World with Flask</em></p>
+
+<p>Unlike Flask, however, Mesop does not use HTML templates. Instead, Mesop provides ready-to-use  UI components, including buttons, menus, tables and other useful components including AI-specific features like a chat interface.</p>
+
+<h2 id="developing-with-mesop">Developing with Mesop</h2>
+
+<p>We are going to develop a multi-page, interactive, data visualization application and on the way we’ll intruduce various aspects of Mesop that are valuable for developing data visualization apps.</p>
+
+<p>The final app with be an exploration of global CO2 emissions that will use buttons, a drop down menu, a slider and interactive Plotly charts.  You can see the main page below. There will be two more pages which will look like the thumbnails on the home page and they will contain a bar chart that shows the CO2 emissions by source and a choropleth that shows emissions by country. (The data used in this app is derived from Our World in Data[2] and included in the project repository).</p>
+
+<p><img title="" src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/appscreenshot.png?raw=true" alt="" data-align="left" /></p>
+
+<p>First, we need to set up the environment.</p>
+
+<p>It’s good practice to use a virtual environment when starting a new project. I use Conda for this so my first step is to go to a command prompt, create a new project directory and create the environment.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda create <span class="nt">-n</span> mesop <span class="nv">python</span><span class="o">=</span>3.12
+</code></pre></div></div>
+
+<p>That will create a new environment for me that uses Python 3.12 called <em>mesop</em>.</p>
+
+<p>I then activate it, install <em>mesop</em> and run VScode (where I do my programming) from the current directory.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda activate mesop
+pip <span class="nb">install </span>mesop
+code <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>If you want to run the code here, you also need to install <em>plotly</em> and <em>pandas</em>.</p>
+
+<p>Mesop apps are web apps. You start them with the command <code class="language-plaintext highlighter-rouge">mesop</code>, e.g.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mesop app1.py
+</code></pre></div></div>
+
+<p>After running the code you will see this message:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Running server on: http://localhost:32123
+ <span class="k">*</span> Serving Flask app <span class="s1">'mesop.server.server'</span>
+ <span class="k">*</span> Debug mode: off
+</code></pre></div></div>
+
+<p>Your application is now running on the <code class="language-plaintext highlighter-rouge">localhost </code>port <code class="language-plaintext highlighter-rouge">32123</code>. Open that in your browser and you will see the result - if you run the ‘Hello World example’ above, you’ll see that message on a webpage.</p>
+
+<h3 id="using-mesop-components">Using Mesop components</h3>
+
+<p>We need to know a little more about Mesop to use it effectively. We need to be able to use it’s UI components, how to process user input and also how to use state variables (something that will be familiar to Taipy or Streamlit users).</p>
+
+<p>So, to get started, let’s look at an app that uses all of these things but is still very simple. Below is a screen shot of a click-counter app that displays the number of times that a button is clicked. Following that is the code.</p>
+
+<p><img src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/clickcounter.png?raw=true" alt="" /></p>
+
+<p>In this app we have some simple UI components - a header, some text and a button - code that captures clicks on the button, and updates the text, and a class that records the state of the app. Let’s see the code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">mesop</span> <span class="k">as</span> <span class="n">me</span>
+
+<span class="nd">@me.stateclass</span>
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+  <span class="n">clicks</span><span class="p">:</span> <span class="nb">int</span>
+
+<span class="k">def</span> <span class="nf">button_click</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">me</span><span class="p">.</span><span class="n">ClickEvent</span><span class="p">):</span>
+  <span class="n">state</span> <span class="o">=</span> <span class="n">me</span><span class="p">.</span><span class="nf">state</span><span class="p">(</span><span class="n">State</span><span class="p">)</span>
+  <span class="n">state</span><span class="p">.</span><span class="n">clicks</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/counter</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+  <span class="n">state</span> <span class="o">=</span> <span class="n">me</span><span class="p">.</span><span class="nf">state</span><span class="p">(</span><span class="n">State</span><span class="p">)</span>
+  <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span><span class="sh">"</span><span class="s"># Click counter</span><span class="sh">"</span><span class="p">)</span>
+  <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Clicks: </span><span class="si">{</span><span class="n">state</span><span class="p">.</span><span class="n">clicks</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+  <span class="n">me</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">Increment counter</span><span class="sh">"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="sh">"</span><span class="s">flat</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="n">on_click</span><span class="o">=</span><span class="n">button_click</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This app has three parts and illustrates the main aspects of a Mesop app.  We need somewhere to record the number of clicks and this is done by using a class called <code class="language-plaintext highlighter-rouge">State</code>. That is the first thing that we create and it contains a single integer variable, <code class="language-plaintext highlighter-rouge">clicks</code>.</p>
+
+<p>The second part of the app is a function that updates the record of clicks. This is invoked when the button is pressed and increments the clicks attribute in <code class="language-plaintext highlighter-rouge">state</code> which is an instance of the class <code class="language-plaintext highlighter-rouge">State</code>.</p>
+
+<p>The final part of the the app defines the endpoint and the user interface at that endpoint. First we create a local version of the state object, then we go on to code the UI.</p>
+
+<p>We can see three statements that build the UI. Two markdown strings and a button. The UI components are within the Mesop library and so are preceded with the prefix <code class="language-plaintext highlighter-rouge">me.</code> . <code class="language-plaintext highlighter-rouge">me.markdown()</code> takes a markdown string and renders it on the screen. The first is these is a simple header. The second displays a Python f-string, which allows us to embed the value of <code class="language-plaintext highlighter-rouge">state.clicks</code>. Finally, the button component: it takes three parameters, a label, a type and a reference to an event handler - when the <code class="language-plaintext highlighter-rouge">on_click</code> event occurs, the function <code class="language-plaintext highlighter-rouge">button_click</code> is invoked.</p>
+
+<p>All Mesop components are prefixed with me. and we can just call them in the right order to create our UI. We’ll see more examples of components, later.</p>
+
+<p>But to design a good app we need to think about layout.</p>
+
+<h3 id="mesop-layout">Mesop layout</h3>
+
+<p>The fundamental layout component in a Mesop app is the <em>box</em>. By combining boxes with the approproprate styling, we can create rich layouts using rows and columns, and grids, or any arbitrary layout that we want.</p>
+
+<p>Let’s say that, in the Click Counter, we want to put the text and the button in the same row. We can just put them into a box and set its layout to <em>flex</em>, (this is a CSS  attribute that means that the components will be placed on a single line, if possible) . We do this by setting the style parameter as below, with the <code class="language-plaintext highlighter-rouge">me.Style()</code> function.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span><span class="sh">"</span><span class="s"># Click counter</span><span class="sh">"</span><span class="p">)</span>
+  <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="sh">"</span><span class="s">flex</span><span class="sh">"</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">20</span><span class="p">)):</span>
+    <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Clicks: </span><span class="si">{</span><span class="n">state</span><span class="p">.</span><span class="n">clicks</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">me</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">Increment counter</span><span class="sh">"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="sh">"</span><span class="s">flat</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="n">on_click</span><span class="o">=</span><span class="n">button_click</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This will put the components on the same line (note we set a gap of 20 so there is some space between them.) Alternatively, we could lay the components out as a grid.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="sh">"</span><span class="s">grid</span><span class="sh">"</span><span class="p">,</span> 
+                             <span class="n">grid_template_columns</span><span class="o">=</span><span class="sh">"</span><span class="s">1fr 1fr</span><span class="sh">"</span><span class="p">)):</span>
+    <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Clicks: </span><span class="si">{</span><span class="n">state</span><span class="p">.</span><span class="n">clicks</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">me</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">Increment counter</span><span class="sh">"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="sh">"</span><span class="s">flat</span><span class="sh">"</span><span class="p">,</span> 
+            <span class="n">on_click</span><span class="o">=</span><span class="n">button_click</span><span class="p">)</span>  
+</code></pre></div></div>
+
+<p>In this code there the number of columns are defined by the number of items in the <code class="language-plaintext highlighter-rouge">grid_template_column</code> string. And the values define the relative widths of the columns. So, “1 fr 1fr” means two columns of equal width, whereas “2fr 1fr 1fr” would mean that there are three columns with the first one being twice the width of the other two.</p>
+
+<p>Writing lots of style parameters for each box that you use can get quite tedious and, since It’s quite a good idea to limit the number of styles that you use, defining them once and then reusing them is a good idea. Below I have defined a style that I will use as the default for future layouts.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Define a style
+</span><span class="n">BLOCK_STYLE</span> <span class="o">=</span> <span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span>
+              <span class="n">padding</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="n">Padding</span><span class="p">.</span><span class="nf">all</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span>
+              <span class="n">background</span><span class="o">=</span><span class="sh">"</span><span class="s">white</span><span class="sh">"</span><span class="p">,</span>
+              <span class="n">width</span><span class="o">=</span><span class="sh">"</span><span class="s">100%</span><span class="sh">"</span><span class="p">,</span>
+            <span class="p">)</span>
+
+ <span class="c1"># and use it
+</span> <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">BLOCK_STYLE</span><span class="p">):</span>
+   <span class="c1"># components here
+</span></code></pre></div></div>
+
+<p>This ensures that the width of the box fills the width of the window but that there is a 12 pixel padding around it and that the background is white. Now everything inside that box will use that style unless the style parameters are overidden and we can resuse the style as I do on the three pages that will make up our app.</p>
+
+<p>There is a lot more to styling than this. The parameters that are set in <code class="language-plaintext highlighter-rouge">me.Style()</code> are equivalent to CSS styles and there are lots of them, ao I’ve limited what I shall cover here to what we will need for this little project.</p>
+
+<h2 id="data-visualization-app">Data Visualization App</h2>
+
+<p>We could talk about Mesop components and layouts for a very long time but that is not why we are here. Our aim is to create a data visualization app and we have covered enough of the basics of Mesop to let us get on with it.</p>
+
+<p>The first thing to admit is that Mesop does not natively support Plotly. But don’t panic! This is a very small hurdle that is easily overcome. Mesop does have a <code class="language-plaintext highlighter-rouge">me.plot()</code> component but that is restricted to Matplotlib. Mesop also has way to create user-defined components and, while I have not looked closely at that, it seems like quite a long-winded way of solving the simple problem of using Plotly.</p>
+
+<p>All you need to use Plotly is a small amount of boiler-plate HTML code that can be reused, as is, for any Plotly project. And since Mesop does have a <code class="language-plaintext highlighter-rouge">me.html()</code> component, that is what I intend to do.</p>
+
+<p>Below is a reusable function that will display a Plotly chart.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">chart_html</span><span class="p">(</span><span class="n">chart</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"""</span><span class="s">
+        &lt;div id=</span><span class="sh">'</span><span class="s">figure</span><span class="sh">'</span><span class="s">&gt;&lt;/div&gt;
+        &lt;script src=</span><span class="sh">"</span><span class="s">https://cdn.plot.ly/plotly-latest.min.js</span><span class="sh">"</span><span class="s">&gt;&lt;/script&gt;
+        &lt;script&gt;
+        Plotly.react(</span><span class="sh">'</span><span class="s">figure</span><span class="sh">'</span><span class="s">, </span><span class="si">{</span><span class="n">chart</span><span class="si">}</span><span class="s">);
+        &lt;/script&gt;
+        &lt;div id=</span><span class="sh">'</span><span class="s">figure</span><span class="sh">'</span><span class="s">&gt;&lt;/div&gt;
+        </span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<p>It’s simple a bit a HTML into which we insert the Plotly chart that we want to display. We can then use an html component to display on the page.</p>
+
+<p>Let’s see it in use.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">mesop</span> <span class="k">as</span> <span class="n">me</span>
+<span class="kn">import</span> <span class="n">plotly.express</span> <span class="k">as</span> <span class="n">px</span>
+
+<span class="c1">#
+# Defs for BLOCK_STYLE and chart_html() go here
+#
+</span>
+<span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+  <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">BLOCK_STYLE</span><span class="p">):</span>
+    <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span><span class="sh">"</span><span class="s"># A Plotly chart</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">data_canada</span> <span class="o">=</span> <span class="n">px</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">gapminder</span><span class="p">().</span><span class="nf">query</span><span class="p">(</span><span class="sh">"</span><span class="s">country == </span><span class="sh">'</span><span class="s">Canada</span><span class="sh">'"</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="p">.</span><span class="nf">bar</span><span class="p">(</span><span class="n">data_canada</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">'</span><span class="s">year</span><span class="sh">'</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">'</span><span class="s">pop</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">chart</span> <span class="o">=</span> <span class="nf">chart_html</span><span class="p">(</span><span class="n">fig</span><span class="p">.</span><span class="nf">to_json</span><span class="p">())</span>
+    <span class="n">me</span><span class="p">.</span><span class="nf">html</span><span class="p">(</span>
+        <span class="nf">chart_html</span><span class="p">(</span><span class="n">chart</span><span class="p">),</span>
+        <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">sandboxed</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="sh">"</span><span class="s">100%</span><span class="sh">"</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="sh">"</span><span class="s">500px</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>We have the same structure as before and we put everything in a <code class="language-plaintext highlighter-rouge">me.box()</code>. The Plotly chart is adapted from the Plotly documentation and uses the bundled Gapminder data to display a population chart for Canada. To include this in the HTML code we need to convert it into JSON format, pass it to the previously defined function and render it using a call to <code class="language-plaintext highlighter-rouge">me.html()</code>.</p>
+
+<p>The style setting out self-explanatory but the <code class="language-plaintext highlighter-rouge">mode </code>parameter needs to be explained. While Mesop allows HTML code it will filter out anything that might be dangerous like JavaScript code. If we need such code we have to set the mode to “sandboxed”. This means that the HTML will be rendered safely in an iframe.</p>
+
+<p>Below is a screenshot of the result.</p>
+
+<p><img src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/plotlychart.png?raw=true" alt="" /></p>
+
+<p>Right, now we have a chart it feels like we are on our way!</p>
+
+<h4 id="co2-data">CO2 Data</h4>
+
+<p>We will be using CO2 emissions data as I’ve already mentioned and to make this easy, I’ve define a Python class that reads the data and provides methods that will return the required Plotly charts in JSON format. The code for this is included in the project GitHub repository but we won’t go into any detailed explanation of the impementation here (the code is easy to follow). What we need to know is that we an instantiate a CO2 data object and</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">CO2_Data</span> <span class="k">as</span> <span class="n">CO2</span>
+
+<span class="n">co2_data</span> <span class="o">=</span> <span class="n">CO2</span><span class="p">.</span><span class="nc">CO2_Data</span><span class="p">()</span>
+<span class="n">bar_chart</span> <span class="o">=</span> <span class="n">co2_data</span><span class="p">.</span><span class="nf">plot_chart</span><span class="p">(</span><span class="sh">"</span><span class="s">Total</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>We will see exactly how it is used later but there are two main methods:</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">plot_chart</code>: this returns a bar chart od CO2 emissions from a particular course over time. The sources are ‘Total’, ‘Oil’, ‘Cement’, ‘Flaring’ and ‘Other’ and we need to provide the source as a parameter.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">plot_choro</code>: this returns a world map of total CO2 emissions for a particular year with the countries coloured according to the level of emissions. It takes the year as a parameter.</p>
+  </li>
+</ul>
+
+<p>We also use some attributes that are defined in the class.</p>
+
+<p>We can now concentrate on the UI in Mesop.</p>
+
+<h4 id="application-pages">Application Pages</h4>
+
+<p>I’ll deal with them separately but I’ve coded all of the pages in a single file. This is the simplest method but not necessarily the best. If there were more than three pages, I’d probably code each page in its own file. Here is the layout for all of the pages.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">home</span><span class="p">():</span>    
+    <span class="c1"># Home page code goes here
+</span>
+<span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/CO2</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">CO2</span><span class="p">():</span>
+    <span class="c1"># CO2 sources page code goes here
+</span>
+<span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/map</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">map</span><span class="p">():</span>
+    <span class="c1"># Map page code goes here
+</span></code></pre></div></div>
+
+<p>Each page is given a route in the <code class="language-plaintext highlighter-rouge">@me.page</code> decorator and the code for the page is defined in the following function.</p>
+
+<p>We’ll start at the beginning with the home page.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">home</span><span class="p">():</span>    
+    <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span> <span class="o">=</span> <span class="n">BLOCK_STYLE</span><span class="p">):</span>       
+        <span class="nf">banner</span><span class="p">(</span><span class="sh">'</span><span class="s">World CO2 Emissions</span><span class="sh">'</span><span class="p">,</span><span class="sh">'</span><span class="s">Explore the graphs below</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span> <span class="sh">"""</span><span class="s">The World</span><span class="sh">'</span><span class="s">s CO2 emissions have been increasing at an alarming rate since the time of the Industrial Revolution. 
+                    We demonstrate the extend of those emissions using two data sets:  the first tracks overall emissions and we show those
+                    onto a World map. We also show the breakdown of the sources of those emissions in a set of bar graphs.</span><span class="sh">"""</span><span class="p">)</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span><span class="sh">"</span><span class="s">_Click on the buttons below to see the charts._</span><span class="sh">"</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span> <span class="o">=</span> <span class="n">FLEX_STYLE</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">():</span>
+                <span class="n">me</span><span class="p">.</span><span class="nf">image</span><span class="p">(</span><span class="n">src</span> <span class="o">=</span> <span class="sh">"</span><span class="s">https://github.com/alanjones2/mesopapps/blob/main/CO2/images/Co2sources.png?raw=true</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="n">alt</span><span class="o">=</span><span class="sh">""</span><span class="p">,</span>
+                    <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="sh">"</span><span class="s">90%</span><span class="sh">"</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">me</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">By source</span><span class="sh">"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="sh">'</span><span class="s">flat</span><span class="sh">'</span><span class="p">,</span><span class="n">on_click</span><span class="o">=</span><span class="n">navigate</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">CO2</span><span class="sh">'</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">():</span>
+                <span class="n">me</span><span class="p">.</span><span class="nf">image</span><span class="p">(</span><span class="n">src</span> <span class="o">=</span> <span class="sh">"</span><span class="s">https://github.com/alanjones2/mesopapps/blob/main/CO2/images/Co2country.png?raw=true</span><span class="sh">"</span><span class="p">,</span>
+                    <span class="n">alt</span><span class="o">=</span><span class="sh">""</span><span class="p">,</span>
+                    <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="sh">"</span><span class="s">90%</span><span class="sh">"</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">me</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">By country</span><span class="sh">"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="sh">'</span><span class="s">flat</span><span class="sh">'</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">navigate</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">map</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The whole thing goes in a <code class="language-plaintext highlighter-rouge">me.box</code> styled with <code class="language-plaintext highlighter-rouge">BLOCk_STYLE</code> and so fills the whole page but includes padding so that the page content does not reach the extremities of the window.</p>
+
+<p>The content is mostly static. We have a banner, some text formatted as Markdown and then boxes that each contain images and a button that will select a new page. These boxes are contained in a third box styled with <code class="language-plaintext highlighter-rouge">FLEX_STYLE</code> which attempts to ensure that the image/button boxes are displayed on the same line.</p>
+
+<p>Most of this is self-explanatory but we need to focus on two things. The first is <code class="language-plaintext highlighter-rouge">banner</code>. This is a function that will be used by all of the pages and is in <code class="language-plaintext highlighter-rouge">utils.py</code> (so this needs to be included). This takes two parameters, a heading and a sub-heading (which can be blank) and is styled with <code class="language-plaintext highlighter-rouge">BANNER_STYLE</code> from <code class="language-plaintext highlighter-rouge">styles.py</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">banner</span><span class="p">(</span><span class="n">head</span><span class="o">=</span><span class="sh">''</span><span class="p">,</span> <span class="n">subhead</span><span class="o">=</span><span class="sh">''</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">BANNER_STYLE</span><span class="p">):</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span> <span class="sa">f</span><span class="sh">"</span><span class="s"># </span><span class="si">{</span><span class="n">head</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="sh">"</span><span class="s">Navy</span><span class="sh">"</span><span class="p">))</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">markdown</span><span class="p">(</span> <span class="sa">f</span><span class="sh">"</span><span class="s">## </span><span class="si">{</span><span class="n">subhead</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="sh">"</span><span class="s">SteelBlue</span><span class="sh">"</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">banner</span>
+</code></pre></div></div>
+
+<p>From a functional point of view, the more important thing to look at is the button code. This allows us to navigate to a new page. It works in the same way as the button we saw in the Click Counter code and calls a function navigate. But there is an additional parameter <code class="language-plaintext highlighter-rouge">key</code> that we set with a string that represents the page that we want to navigate to. Here in the <code class="language-plaintext highlighter-rouge">navigate</code> function</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">navigate</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">me</span><span class="p">.</span><span class="n">ClickEvent</span><span class="p">):</span>
+    <span class="n">match</span> <span class="n">event</span><span class="p">.</span><span class="n">key</span><span class="p">:</span>
+        <span class="n">case</span> <span class="sh">"</span><span class="s">CO2</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">me</span><span class="p">.</span><span class="nf">navigate</span><span class="p">(</span><span class="sh">"</span><span class="s">/CO2</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">case</span> <span class="sh">"</span><span class="s">map</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">me</span><span class="p">.</span><span class="nf">navigate</span><span class="p">(</span><span class="sh">"</span><span class="s">/map</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">case</span> <span class="n">_</span><span class="p">:</span>
+            <span class="n">me</span><span class="p">.</span><span class="nf">navigate</span><span class="p">(</span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>As you can see <code class="language-plaintext highlighter-rouge">key</code> is part of an event object. We read it and depending on its value, use the built-in <code class="language-plaintext highlighter-rouge">me.navigate()</code> function to go to the required page. Each of the other pages also use the same function to navigate to the <em>home</em> page.</p>
+
+<p>The map page and the CO2 cources page are logically very similar. Here’s the code for the map page.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">on_slider_change</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+   <span class="k">global</span> <span class="n">CO2_map</span>
+   <span class="n">State</span><span class="p">.</span><span class="n">year</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">value</span><span class="p">)</span>
+   <span class="n">CO2_map</span> <span class="o">=</span> <span class="n">co2_data</span><span class="p">.</span><span class="nf">plot_choro</span><span class="p">(</span><span class="nf">int</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="n">value</span><span class="p">))</span>   
+
+<span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/map</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">map</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span> <span class="o">=</span> <span class="n">BLOCK_STYLE</span><span class="p">):</span>
+        <span class="nf">banner</span><span class="p">(</span> <span class="sa">f</span><span class="sh">"</span><span class="s">CO2 Emissions by country for </span><span class="si">{</span><span class="n">State</span><span class="p">.</span><span class="n">year</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">slider</span><span class="p">(</span><span class="n">on_value_change</span><span class="o">=</span><span class="n">on_slider_change</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">State</span><span class="p">.</span><span class="n">year</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="sh">'</span><span class="s">2020</span><span class="sh">'</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="sh">'</span><span class="s">1900</span><span class="sh">'</span><span class="p">,</span> <span class="n">discrete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">me</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">Home page</span><span class="sh">"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">navigate</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">home</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">html</span><span class="p">(</span>
+            <span class="nf">chart_html</span><span class="p">(</span><span class="n">CO2_map</span><span class="p">),</span>
+            <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">sandboxed</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="sh">"</span><span class="s">100%</span><span class="sh">"</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="sh">"</span><span class="s">500px</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/Co2country.png?raw=true" alt="" /></p>
+
+<p>Another box and another banner. But then a <code class="language-plaintext highlighter-rouge">me.slider</code> functiion with parameters whose use are clear. When it changes the global variable <code class="language-plaintext highlighter-rouge">CO2_map</code> is updated and this is displayed via the <code class="language-plaintext highlighter-rouge">me.html()</code> function and out little utility <code class="language-plaintext highlighter-rouge">chart_html</code> . We also see that the button uses the navigate function to return to the <em>home</em> page when pressed.</p>
+
+<p>The rest of the code is similar to things we’ve seem before.</p>
+
+<p>That leaves the CO2 Sources page which uses a drop-down menu to select the source to be displayed.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">on_selection_change</span><span class="p">(</span><span class="n">select</span><span class="p">):</span>
+   <span class="k">global</span> <span class="n">bar_chart</span>
+   <span class="n">bar_chart</span> <span class="o">=</span> <span class="n">co2_data</span><span class="p">.</span><span class="nf">plot_chart</span><span class="p">(</span><span class="n">select</span><span class="p">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="nd">@me.page</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="sh">"</span><span class="s">/CO2</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">CO2</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">me</span><span class="p">.</span><span class="nf">box</span><span class="p">(</span><span class="n">style</span> <span class="o">=</span> <span class="n">BLOCK_STYLE</span><span class="p">):</span>
+        <span class="nf">banner</span><span class="p">(</span> <span class="sh">"</span><span class="s">CO2 Emissions by source since the mid-19th Century</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span>
+            <span class="n">label</span><span class="o">=</span><span class="sh">"</span><span class="s">Select a CO2 Source</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">me</span><span class="p">.</span><span class="nc">SelectOption</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="sh">"</span><span class="s">Total</span><span class="sh">"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">Total</span><span class="sh">"</span><span class="p">),</span>
+            <span class="n">me</span><span class="p">.</span><span class="nc">SelectOption</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="sh">"</span><span class="s">Coal</span><span class="sh">"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">Coal</span><span class="sh">"</span><span class="p">),</span>
+            <span class="n">me</span><span class="p">.</span><span class="nc">SelectOption</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="sh">"</span><span class="s">Oil</span><span class="sh">"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">Oil</span><span class="sh">"</span><span class="p">),</span>
+            <span class="n">me</span><span class="p">.</span><span class="nc">SelectOption</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="sh">"</span><span class="s">Cement</span><span class="sh">"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">Cement</span><span class="sh">"</span><span class="p">),</span>
+            <span class="n">me</span><span class="p">.</span><span class="nc">SelectOption</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="sh">"</span><span class="s">Flaring</span><span class="sh">"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">Flaring</span><span class="sh">"</span><span class="p">),</span>
+            <span class="n">me</span><span class="p">.</span><span class="nc">SelectOption</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="sh">"</span><span class="s">Other</span><span class="sh">"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">Other</span><span class="sh">"</span><span class="p">),</span>      
+            <span class="p">],</span>
+            <span class="n">on_selection_change</span><span class="o">=</span><span class="n">on_selection_change</span><span class="p">,</span>
+            <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">240</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">70</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">me</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">Home page</span><span class="sh">"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">navigate</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="sh">'</span><span class="s">home</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">me</span><span class="p">.</span><span class="nf">html</span><span class="p">(</span>
+            <span class="nf">chart_html</span><span class="p">(</span><span class="n">bar_chart</span><span class="p">),</span>
+            <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">sandboxed</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">style</span><span class="o">=</span><span class="n">me</span><span class="p">.</span><span class="nc">Style</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="sh">"</span><span class="s">100%</span><span class="sh">"</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="sh">"</span><span class="s">500px</span><span class="sh">"</span><span class="p">)</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/Co2sources.png?raw=true" alt="" /></p>
+
+<p>The logic is the same as before so I won’t go into detail. The <code class="language-plaintext highlighter-rouge">me.select</code> function has different parameters to the slider but the main thing to notice is that the possible selections are defined as a list of <code class="language-plaintext highlighter-rouge">me.SelectOption()</code>s and that each of these have a label (that will be displayed) and a value which s passed to the change function.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>There we have the complete app based on Mesop.</p>
+
+<p>I’ve tried to make this as clear as I can without embedding the whole of the code into the article. If it is not absolutely clear how we put together all of the sections then you should refer to the code in the GitHub repo and read the README.md file there.</p>
+
+<p>So, what do we think about Mesop as a vehicle for creating visualisation app? All new frameworks represent a learning curve but Mesop is not that difficult if you are familiar with other Flask-based frameworks such as Dash or <a href="https://medium.com/towards-data-science/a-data-dashboard-in-pure-python-with-taipy-bdb164a62b8b">Taipy</a>.</p>
+
+<p>Mesop’s components seem easy to use but while the layout is simple, it can get a bit verbose. This is down to the fact that the layout parameters are basically a mirror of CSS attributes that you find in HTML. However, the ability to define layouts and use them multiple times is a useful way of reducing verbosity and providing consistency.</p>
+
+<p>I’ve found working with Mesop for the first time a useful experience and I am likely to use it again. I might not code everything in the same way next time (I’m always uncomfortable with using global variables, for example, and I might put pages in separate files, in the future).</p>
+
+<p>Will it become a properly supported product in the future? I have no inside information but my guess would be yes. Google seem to have put a fair amount of effort into developing it, documenting it and talking about it and it would be a shame if it disappeared.</p>
+
+<hr />
+
+<p>As ever, thanks for reading, I hope that this stroll through Mesop’s abilities has been useful. You can see more of my articles on my <a href="alanjones2.github.io">website </a> and can find out when I publish new stuff by subscribing to my occasional <a href="technofile.substack.com">newsletter</a>. Most of my stuff is also on <a href="https://medium.com/@alan-jones">Medium </a>(paywalled).</p>
+
+<hr />
+
+<h3 id="notes-and-references">Notes and references</h3>
+
+<ol>
+  <li>The Mesop GitHub repository is <a href="[GitHub - google/mesop: Rapidly build AI apps in Python](https://github.com/google/mesop)">here </a>and the official docs are <a href="[Mesop](https://google.github.io/mesop/)">here</a>.</li>
+  <li>The data used in this article is derived from <a href="https://ourworldindata.org/">Our World in Data</a>. OWID publishes articles and data about the most pressing problems that the world faces. All its content is open source and its data is downloadable — see <a href="https://ourworldindata.org/about">About — Our World in Data</a> for details.</li>
+  <li>The title image was created with the help of DALL-E all the others are all screenshots by me, the author.</li>
+  <li>I have no connection with Google other than as a user.</li>
+</ol>]]></content><author><name></name></author><summary type="html"><![CDATA[Google Mesop is an easy-to-use Python UI framework. We see how to use it to create Data Visualization app with Plotly.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/front.png?raw=true" /><media:content medium="image" url="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/front.png?raw=true" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">How to Build a Private AI Agent with Ollama and LlamaIndex</title><link href="http://localhost:4000/2024/10/18/ollama-agent.html" rel="alternate" type="text/html" title="How to Build a Private AI Agent with Ollama and LlamaIndex" /><published>2024-10-18T00:00:00+02:00</published><updated>2024-10-18T00:00:00+02:00</updated><id>http://localhost:4000/2024/10/18/ollama-agent</id><content type="html" xml:base="http://localhost:4000/2024/10/18/ollama-agent.html"><![CDATA[<p><img src="/assets/images/llamaindex/db5withllama.png" alt="" /></p>
 
 <p><em>Image by author with a little help from Microsoft Bing Image Creator (Ok, ok… a  lot of help)</em></p>
 
@@ -1107,8 +1510,6 @@ _Made with Taipy_
                     <span class="n">dropdown</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
                     <span class="n">on_change</span><span class="o">=</span><span class="n">on_select</span><span class="p">)</span>
     <span class="n">tgb</span><span class="p">.</span><span class="nf">chart</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="sh">"</span><span class="s">{fig2}</span><span class="sh">"</span><span class="p">)</span>
-
-
 </code></pre></div></div>
 
 <p>This page displays the bar chart of CO2 emissions by source. To select the source it utilises a drop-down menu, the chart is drawn using Plotly and the data, derived from Our World in Data[1], are read from a CSV file. The page itself is constructed using Taipy’s GUI Builder package.</p>
@@ -1228,7 +1629,6 @@ _Made with Taipy_
     <span class="n">tgb</span><span class="p">.</span><span class="nf">text</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">#### Use the slider to select a year</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">md</span><span class="sh">'</span><span class="p">)</span>
     <span class="n">tgb</span><span class="p">.</span><span class="nf">slider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">{year}</span><span class="sh">"</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">year_min</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">year_max</span><span class="p">,</span> <span class="n">on_change</span><span class="o">=</span><span class="n">on_slider</span><span class="p">)</span>
     <span class="n">tgb</span><span class="p">.</span><span class="nf">chart</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="sh">"</span><span class="s">{fig}</span><span class="sh">"</span><span class="p">)</span>
-
 </code></pre></div></div>
 
 <p>If you look closely you will see that the structure is very similar to the <em>CO2 Sources</em> page. The main difference to the page layout is that we include a slider element instead of a menu. The remainder is much the same: some state variables are given initial values; there is a plotting function; and there is a callback function that calls the plotting function in the same way as before.</p>
@@ -1267,7 +1667,6 @@ _Made with Taipy_
                     <span class="n">tgb</span><span class="p">.</span><span class="nf">text</span><span class="p">(</span><span class="sh">"</span><span class="s">__Select CO2 by Country page here:__</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">md</span><span class="sh">'</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">tgb</span><span class="p">.</span><span class="nf">part</span><span class="p">():</span>
                     <span class="n">tgb</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">CO2 by Country</span><span class="sh">"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="sh">"</span><span class="s">CO2Country</span><span class="sh">"</span><span class="p">,</span> <span class="n">on_action</span><span class="o">=</span><span class="n">on_button_press</span><span class="p">)</span>
-
 </code></pre></div></div>
 
 <p>The page begins with text headers and then is split into two columns - each column is defined in a <code class="language-plaintext highlighter-rouge">tgb.part()</code>. In those columns we display images of the other pages via Markdown text and then, below the images there are two more columns, the left one for a label and the right one for a button. The callback function defined for the two buttons is the same. <code class="language-plaintext highlighter-rouge">on_button_press()</code> and each button had an <code class="language-plaintext highlighter-rouge">id </code>set for it - this id will be passed into the callback function.</p>
@@ -1293,7 +1692,7 @@ _Made with Taipy_
 <h1 id="notes">Notes</h1>
 
 <ol>
-  <li>The data used in this article is derived from <a href="https://ourworldindata.org/">Our World in Data</a>. OWD publishes articles and data about the most pressing problems that the world faces. All its content is open source and its data is downloadable — see <a href="https://ourworldindata.org/about">About — Our World in Data</a> for details.</li>
+  <li>The data used in this article is derived from <a href="https://ourworldindata.org/">Our World in Data</a>. OWID publishes articles and data about the most pressing problems that the world faces. All its content is open source and its data is downloadable — see <a href="https://ourworldindata.org/about">About — Our World in Data</a> for details.</li>
   <li>Code and data for this app are available in my <a href="https://github.com/alanjones2/taipyapps">GitHub</a> repo in the folder ‘multipage’.</li>
   <li>All images, screenshots, diagrams, etc. are by me, the author, unless otherwise noted.</li>
   <li>While there is a commercial version of Taipy, this article uses the open source version.</li>
@@ -2264,4 +2663,4 @@ Imagine your organisation has decided to use Streamlit as its primary platform f
 
 <p><em>Links to Amazon are affiliate links which means if you purchase something I may get a small commission but it will not affect the price you pay</em></p>
 
-<p>All images and screenshots are by me, the author, unless otherwise noted.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[We code examples using Altair, Bokeh, Plotly, Pandas Plot and Matplotlib, to illustrate the pros and cons of each one]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" /><media:content medium="image" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">An Interactive Web Dashboard with Plotly and Flask</title><link href="http://localhost:4000/2024/01/01/An-Interactive-Web-Dashboard-with-Plotly-and-Flask.html" rel="alternate" type="text/html" title="An Interactive Web Dashboard with Plotly and Flask" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/An-Interactive-Web-Dashboard-with-Plotly-and-Flask</id><content type="html" xml:base="http://localhost:4000/2024/01/01/An-Interactive-Web-Dashboard-with-Plotly-and-Flask.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[To create a truly interactive app with Dash you need to use callbacks. You can achieve the same thing with Plotly and Flask.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://miro.medium.com/max/875/1*lrkc5plidfgwhZlAeQ3dmw.png" /><media:content medium="image" url="https://miro.medium.com/max/875/1*lrkc5plidfgwhZlAeQ3dmw.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">ChatGPT Prompting for Coders - a Prototyping Approach</title><link href="http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach.html" rel="alternate" type="text/html" title="ChatGPT Prompting for Coders - a Prototyping Approach" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach</id><content type="html" xml:base="http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[A suitable prompting technique can make the development of usable code with ChatGPT quite painless. Here we prototype a Streamlit app for tracking cryptocurrency.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://miro.medium.com/v2/resize:fit:786/format:webp/1*0YOew4uEABFAEIp87uyw-Q.png" /><media:content medium="image" url="https://miro.medium.com/v2/resize:fit:786/format:webp/1*0YOew4uEABFAEIp87uyw-Q.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an AI-Generated Streamlit Application with an OpenAI Assistant</title><link href="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html" rel="alternate" type="text/html" title="Create an AI-Generated Streamlit Application with an OpenAI Assistant" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[We use the OpenAI Playground and code completion tools to create a Streamlit app with interactive Plotly charts]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" /><media:content medium="image" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an Interactive Web App with PyScript and Pandas</title><link href="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html" rel="alternate" type="text/html" title="Create an Interactive Web App with PyScript and Pandas" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[PyScript allows us to create a serverless web application with HTML and Python as the scripting language.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" /><media:content medium="image" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p>All images and screenshots are by me, the author, unless otherwise noted.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[We code examples using Altair, Bokeh, Plotly, Pandas Plot and Matplotlib, to illustrate the pros and cons of each one]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" /><media:content medium="image" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">ChatGPT Prompting for Coders - a Prototyping Approach</title><link href="http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach.html" rel="alternate" type="text/html" title="ChatGPT Prompting for Coders - a Prototyping Approach" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach</id><content type="html" xml:base="http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[A suitable prompting technique can make the development of usable code with ChatGPT quite painless. Here we prototype a Streamlit app for tracking cryptocurrency.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://miro.medium.com/v2/resize:fit:786/format:webp/1*0YOew4uEABFAEIp87uyw-Q.png" /><media:content medium="image" url="https://miro.medium.com/v2/resize:fit:786/format:webp/1*0YOew4uEABFAEIp87uyw-Q.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an AI-Generated Streamlit Application with an OpenAI Assistant</title><link href="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html" rel="alternate" type="text/html" title="Create an AI-Generated Streamlit Application with an OpenAI Assistant" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[We use the OpenAI Playground and code completion tools to create a Streamlit app with interactive Plotly charts]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" /><media:content medium="image" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an Interactive Web App with PyScript and Pandas</title><link href="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html" rel="alternate" type="text/html" title="Create an Interactive Web App with PyScript and Pandas" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[PyScript allows us to create a serverless web application with HTML and Python as the scripting language.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" /><media:content medium="image" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

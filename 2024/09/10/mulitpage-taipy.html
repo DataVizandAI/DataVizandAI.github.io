@@ -262,8 +262,6 @@ _Made with Taipy_
                     <span class="n">dropdown</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
                     <span class="n">on_change</span><span class="o">=</span><span class="n">on_select</span><span class="p">)</span>
     <span class="n">tgb</span><span class="p">.</span><span class="nf">chart</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="sh">"</span><span class="s">{fig2}</span><span class="sh">"</span><span class="p">)</span>
-
-
 </code></pre></div></div>
 
 <p>This page displays the bar chart of CO2 emissions by source. To select the source it utilises a drop-down menu, the chart is drawn using Plotly and the data, derived from Our World in Data[1], are read from a CSV file. The page itself is constructed using Taipy’s GUI Builder package.</p>
@@ -383,7 +381,6 @@ _Made with Taipy_
     <span class="n">tgb</span><span class="p">.</span><span class="nf">text</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">#### Use the slider to select a year</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">md</span><span class="sh">'</span><span class="p">)</span>
     <span class="n">tgb</span><span class="p">.</span><span class="nf">slider</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="sh">"</span><span class="s">{year}</span><span class="sh">"</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">year_min</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">year_max</span><span class="p">,</span> <span class="n">on_change</span><span class="o">=</span><span class="n">on_slider</span><span class="p">)</span>
     <span class="n">tgb</span><span class="p">.</span><span class="nf">chart</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="sh">"</span><span class="s">{fig}</span><span class="sh">"</span><span class="p">)</span>
-
 </code></pre></div></div>
 
 <p>If you look closely you will see that the structure is very similar to the <em>CO2 Sources</em> page. The main difference to the page layout is that we include a slider element instead of a menu. The remainder is much the same: some state variables are given initial values; there is a plotting function; and there is a callback function that calls the plotting function in the same way as before.</p>
@@ -422,7 +419,6 @@ _Made with Taipy_
                     <span class="n">tgb</span><span class="p">.</span><span class="nf">text</span><span class="p">(</span><span class="sh">"</span><span class="s">__Select CO2 by Country page here:__</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">'</span><span class="s">md</span><span class="sh">'</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">tgb</span><span class="p">.</span><span class="nf">part</span><span class="p">():</span>
                     <span class="n">tgb</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="sh">"</span><span class="s">CO2 by Country</span><span class="sh">"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="sh">"</span><span class="s">CO2Country</span><span class="sh">"</span><span class="p">,</span> <span class="n">on_action</span><span class="o">=</span><span class="n">on_button_press</span><span class="p">)</span>
-
 </code></pre></div></div>
 
 <p>The page begins with text headers and then is split into two columns - each column is defined in a <code class="language-plaintext highlighter-rouge">tgb.part()</code>. In those columns we display images of the other pages via Markdown text and then, below the images there are two more columns, the left one for a label and the right one for a button. The callback function defined for the two buttons is the same. <code class="language-plaintext highlighter-rouge">on_button_press()</code> and each button had an <code class="language-plaintext highlighter-rouge">id </code>set for it - this id will be passed into the callback function.</p>
@@ -448,7 +444,7 @@ _Made with Taipy_
 <h1 id="notes">Notes</h1>
 
 <ol>
-  <li>The data used in this article is derived from <a href="https://ourworldindata.org/">Our World in Data</a>. OWD publishes articles and data about the most pressing problems that the world faces. All its content is open source and its data is downloadable — see <a href="https://ourworldindata.org/about">About — Our World in Data</a> for details.</li>
+  <li>The data used in this article is derived from <a href="https://ourworldindata.org/">Our World in Data</a>. OWID publishes articles and data about the most pressing problems that the world faces. All its content is open source and its data is downloadable — see <a href="https://ourworldindata.org/about">About — Our World in Data</a> for details.</li>
   <li>Code and data for this app are available in my <a href="https://github.com/alanjones2/taipyapps">GitHub</a> repo in the folder ‘multipage’.</li>
   <li>All images, screenshots, diagrams, etc. are by me, the author, unless otherwise noted.</li>
   <li>While there is a commercial version of Taipy, this article uses the open source version.</li>
