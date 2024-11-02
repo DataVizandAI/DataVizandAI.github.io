@@ -1,4 +1,421 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-10-29T12:36:35+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">Hands on Data Visualization with Google Mesop</title><link href="http://localhost:4000/2024/10/26/atavizmesop.html" rel="alternate" type="text/html" title="Hands on Data Visualization with Google Mesop" /><published>2024-10-26T00:00:00+02:00</published><updated>2024-10-26T00:00:00+02:00</updated><id>http://localhost:4000/2024/10/26/atavizmesop</id><content type="html" xml:base="http://localhost:4000/2024/10/26/atavizmesop.html"><![CDATA[<p><img src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/front.png?raw=true" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-11-02T17:06:45+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">Hands on with OpenAI Swarm</title><link href="http://localhost:4000/2024/11/02/hands-on-swarm.html" rel="alternate" type="text/html" title="Hands on with OpenAI Swarm" /><published>2024-11-02T00:00:00+01:00</published><updated>2024-11-02T00:00:00+01:00</updated><id>http://localhost:4000/2024/11/02/hands-on-swarm</id><content type="html" xml:base="http://localhost:4000/2024/11/02/hands-on-swarm.html"><![CDATA[<p><img src="https://github.com/alanjones2/swarmapps/blob/main/images/swarmtext.png?raw=true" alt="" /></p>
+
+<p>There’s a joke about London buses: you wait for ages for one to come along and suddenly three arrive together. (It is supposed to be a joke but it’s also <a href="[Bus bunching - Wikipedia](https://en.wikipedia.org/wiki/Bus_bunching)">true</a>.)</p>
+
+<p>It’s beginning to feel like that with agent orchestration frameworks. We have solutions from the usual suspects, of course, like LangChain and LlamaIndex, but new products are coming on the market with alarming frequency: CrewAI, MotleyCrew, Autogen, and Atomic Agents are some that I’ve encountered recently but there are more frameworks for which I haven’t even found time to look at the README on GitHub.</p>
+
+<p>Now, from one of the biggest players, OpenAI, comes <strong>Swarm</strong>. And because it’s from OpenAI, I thought I should take a closer look at it. Swarm takes a step back from the sophistication of other products. Rather than present itself as an all-singing, all-dancing solution, it is an experimental, educational framework developed by OpenAI for exploring lightweight multi-agent orchestration. The aim, it seems, is for you to learn how tool-using multi-agent systems work rather than provide a production-ready solution like the products mentioned above.</p>
+
+<p>Its main purpose is to demonstrate the notions of <em>handoffs</em> and <em>routines</em> that are detailed in OpenAI’s <a href="https://cookbook.openai.com/examples/orchestrating_agents">“Orchestrating Agents: Handoffs &amp; Routines”</a> cookbook. These ideas are fundamental to the construction of multi-agent solutions:</p>
+
+<ul>
+  <li>
+    <p><strong>Routines</strong> can be thought of as a set of instructions (which in the context of AI agents, can be represented by a system prompt), the agent that encompasses it, and the <em>tools</em>  available to the agent. That may sound like quite a lot of stuff but, in Swarm, these are easily coded.</p>
+  </li>
+  <li>
+    <p><strong>Handoffs</strong> are the transfer of control from one agent to another - just like when you phone the bank, the person answering the phone may pass you on to someone more expert in your particular interests. In Swarm different agents will perform different tasks, but, unlike the real world, with Swarm, the new agent has a record of your previous conversations. Handoffs are key to multi-agent systems.</p>
+  </li>
+</ul>
+
+<p>If you master these concepts you are well on the way to developing multi-agent solutions to complex problems.</p>
+
+<p>Shortly, we will explore the construction of tool-using multi-agent apps in Swarm. But first, maybe we should ask the question, why would you want a multi-agent system, anyway?</p>
+
+<h3 id="why-multi-agent-systems">Why multi-agent systems?</h3>
+
+<p>We all know LLMs hallucinate. They are, after all, just systems that work out the next probable token and, while we hope those tokens are generated from relevant material, we can’t guarantee that. We could, and sometimes do, end up with an entirely fictional response to an LLM query.</p>
+
+<p>It seems clear that the more complex the task you set an LLM, the more likely it is to hallucinate, so breaking down that complexity into smaller tasks and assigning them to different agents may result in a more resilient system.</p>
+
+<p>Furthermore, with a multi-agent system, we can assign different LLMs to different agents and assign different tools to different agents. So, if we have an LLM that is particularly good at code generation, we can create one agent that uses that, while another agent might be better at, say, interpreting the natural language of the user. Working together the agents could provide a better application-generating solution than a single agent that was more general-purpose.</p>
+
+<p>Another consideration is that smaller, more specialist LLMs, might run on smaller less specialist hardware thus allowing local processing for free rather than forking out loads of dosh to large industrial mega-companies (just a thought).</p>
+
+<p>But let’s assume that we do want to create a multi-agent system with Swarm. We’ll start with the basics.</p>
+
+<h3 id="installation">Installation</h3>
+
+<p>I generally start any new project by creating a virtual environment. I use Conda, so for this project, from a command prompt, I opened a new directory and created and activated  a virtual environment called <em>swarm</em>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>swarmapps
+<span class="nb">cd </span>swarmapps
+conda create <span class="nt">-n</span> swarm <span class="nv">python</span><span class="o">=</span>3.12
+conda activate swarm
+</code></pre></div></div>
+
+<p>Swarm requires Python 3.10+ (here I’m using 3.12) and can be installed from GitHub using pip:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install git+ssh://git@github.com/openai/swarm.git
+</code></pre></div></div>
+
+<p>or</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip install git+https://github.com/openai/swarm.git
+</code></pre></div></div>
+
+<p>If you want to reproduce my code yourself,  you’ll also have to install <em>wikipedia</em> as this is used in a Python tool and you will also need to install <em>jupyter</em> to run the code.</p>
+
+<p>I use VSCode for my programming[1] and use the command <code class="language-plaintext highlighter-rouge">code .</code> to invoke the editor in the current directory. If you prefer to use Juypter , run <code class="language-plaintext highlighter-rouge">jupyter notebook</code> or <code class="language-plaintext highlighter-rouge">jupyter lab</code> instead. OK, now we’re up and running.</p>
+
+<p>As I used a Jupyter Notebook to write the program code, to follow along you can just pop each piece of code into a new notebook cell (the complete Notebook will also be available on GitHub).</p>
+
+<h3 id="a-first-swarm-program">A first Swarm program</h3>
+
+<p>Bear in mind that to run standard Swarm code you need an OpenAI account and API key. The key should be set as an environment variable and will be picked up by Swarm. This means that you will be charged if you run the code below. You shouldn’t rack up much of a bill with this project - I’ve spent less than a dollar on it, so far,  but you should always make sure that you monitor your expenditure in the OpenAI dashboard.</p>
+
+<p>Before we get to any working code we will need to import Swarm and create a client (as we would with an OpenAI app).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">swarm</span> <span class="kn">import</span> <span class="n">Swarm</span><span class="p">,</span> <span class="n">Agent</span>
+<span class="n">client</span> <span class="o">=</span> <span class="nc">Swarm</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The next thing is to create a basic agent. We’ll give it a name: ‘Agent’ and it will be in the variable <code class="language-plaintext highlighter-rouge">agent </code>(and, yes, you’re right, not a lot of effort went into coming up with those names, and not much for the instructions, either - I wonder if anyone has tried “You are an unhelpful agent”).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Agent</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="o">=</span><span class="sh">"</span><span class="s">You are a helpful agent.</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>That is pretty easy. The instructions that we give it will become the system prompt.</p>
+
+<p>Now we can use it.</p>
+
+<p>First, we need to create a message list that we can pass to the agent, which contains the user’s initial message and to which the agent will add its response.</p>
+
+<p>We then invoke the function,<code class="language-plaintext highlighter-rouge">client.run()</code>, passing in the message list and the agent. We record the response is the variable <code class="language-plaintext highlighter-rouge">response</code>.</p>
+
+<p>Here’s the code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">What is the capital of Portugal</span><span class="sh">"</span><span class="p">}]</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>This is a simple call to the agent, asking a simple question and, as you would expect, getting a simple answer.</p>
+
+<p>The first message is coded as a dictionary with the <code class="language-plaintext highlighter-rouge">"role"</code> set to <code class="language-plaintext highlighter-rouge">"user"</code> and the<code class="language-plaintext highlighter-rouge"> "content"</code> set to the question that we want to ask - in this case, we want to know the capital of Portugal. This message is the only item in the list, <code class="language-plaintext highlighter-rouge">messages</code>. When we pass the message and the agent to the <code class="language-plaintext highlighter-rouge">client.run()</code> function the LLM will append a new message to the list and return a response that includes those messages.</p>
+
+<p>In the last line of the code, we print the content of the last message which is:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The capital of Portugal is Lisbon.
+</code></pre></div></div>
+
+<p>So, no problems there but there is one thing that we notice. Swarm is not as sophisticated as other frameworks. We have to hardcode the messages in a list: there are no helper functions as you might find in other frameworks. This, I think, that this is deliberate. The aim of Swarm is for you to understand what you are doing and not hide the functionality behind too many abstractions.</p>
+
+<p>So, that is the basic stuff done. Now we will explore the more interesting aspects of Swarm.</p>
+
+<p>(As a matter of interest did I try changing the prompt to “You are an unhelpful agent” and it responded with “I cannot assist with that” - fair enough! )</p>
+
+<h3 id="handoffs">Handoffs</h3>
+
+<p>Here is an example of a simple handoff from the Swarm docs[2]. We define two agents one speaks English and the other speaks Spanish. Additionally, we define a tool function (that returns the Spanish agent) which we append to the English agent.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">english_agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">English Agent</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="o">=</span><span class="sh">"</span><span class="s">You only speak English.</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">spanish_agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Spanish Agent</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="o">=</span><span class="sh">"</span><span class="s">You only speak Spanish.</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">transfer_to_spanish_agent</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Transfer spanish speaking users immediately.</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">spanish_agent</span>
+
+<span class="n">english_agent</span><span class="p">.</span><span class="n">functions</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">transfer_to_spanish_agent</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Below is an example of talking to the English agent in English.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Hi. How are you?</span><span class="sh">"</span><span class="p">}]</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">english_agent</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="sh">"</span><span class="s">content
+</span><span class="sh">"</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>And here is the response that is logical and shows no handoff.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Hello</span><span class="err">!</span> <span class="n">I</span><span class="sh">'</span><span class="s">m just a computer program, so I don</span><span class="sh">'</span><span class="n">t</span> <span class="n">have</span> <span class="n">feelings</span><span class="p">,</span> 
+<span class="n">but</span> <span class="n">I</span><span class="sh">'</span><span class="s">m here to help you. How can I assist you today?
+</span></code></pre></div></div>
+
+<p>But if you talk to the English agent in Spanish.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Hola. ¿Como estás?</span><span class="sh">"</span><span class="p">}]</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">english_agent</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>The response shows a handoff to the Spanish agent and the response is, of course, in Spanish.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{"assistant": "Spanish Agent"}
+¡Hola! Estoy bien, gracias. ¿Y tú, cómo estás?
+</code></pre></div></div>
+
+<p>This is a simple example and the response shows that handoffs work. However, it has to be said that this is not particularly useful as the agent will normally respond in the same language as the query without the need to handoff to a specialised agent. We’ll see a more useful example later.</p>
+
+<h3 id="tools">Tools</h3>
+
+<p>We’ve seen a simple tool in the handoff above but let’s define a couple more functions that will be used as tools that perform tasks that the agent cannot.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">wikipedia</span>
+
+<span class="k">def</span> <span class="nf">wikipedia_lookup</span><span class="p">(</span><span class="n">q</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Look up a query in Wikipedia and return the result</span><span class="sh">"""</span>
+    <span class="k">try</span><span class="p">:</span> <span class="k">return</span> <span class="n">wikipedia</span><span class="p">.</span><span class="nf">page</span><span class="p">(</span><span class="n">q</span><span class="p">).</span><span class="n">summary</span>
+    <span class="k">except</span><span class="p">:</span> <span class="k">return</span> <span class="bp">None</span>
+
+<span class="k">def</span> <span class="nf">wikipedia_search</span><span class="p">(</span><span class="n">q</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Search for a topic in Wikipedia and return the result</span><span class="sh">"""</span>
+    <span class="k">return</span> <span class="n">wikipedia</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Above there are two functions:</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">wikipedia_lookup </code>returns a summary of a Wikipedia page</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">wikipedia_search </code>returns the result of (of course) a Wikipedia search.</p>
+  </li>
+</ul>
+
+<p>Both take strings as input parameters and both return strings. The docstring for each gives a brief description of the function. The type hints and the docstrings are useful for the agent to know how to use the tools.</p>
+
+<p>Here are a couple of examples of how the functions can be used. First, the search function:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">topics</span> <span class="o">=</span> <span class="n">wikipedia</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="sh">'</span><span class="s">EU capitals</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">topics</span>
+</code></pre></div></div>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>['European Capital of Culture',
+ 'List of national capitals',
+ 'Religion in the European Union',
+ 'European Union',
+ 'Vienna Capitals',
+ 'European Council on Foreign Relations',
+ 'Crime in London',
+ 'Crime in Bucharest',
+ 'Flag of Europe',
+ 'Ramona Strugariu']
+</code></pre></div></div>
+
+<p>It returns a list of results. Now let’s look up the Wikipedia page for one of the results with the lookup function:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">entry</span> <span class="o">=</span> <span class="nf">wikipedia_lookup</span><span class="p">(</span><span class="n">topics</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The European Union (EU) is a supranational political and 
+economic union of 27 member states that are located... 
+
+etc.
+</code></pre></div></div>
+
+<p>The response is only a summary of a Wikipedia page but far too long to include here, so I’ve truncated it but you get the idea.</p>
+
+<p>Now let’s see how we use the tools with an agent.</p>
+
+<h3 id="a-tool-using-agent">A tool-using agent</h3>
+
+<p>Here we define a new agent that incorporates the tools that we used above.</p>
+
+<p>The agent responds to a query by searching for keywords and looking up a suitable entry in Wikipedia. You can see the detailed instructions in the code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">wikiagent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Agent</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="o">=</span><span class="sh">"""</span><span class="s">You are a helpful agent that answers user queries by 
+                    finding and analysing information from Wikipedia.
+                    You should follow the following sequence:
+                      1. Work out what the user is interested in.
+                      2. Pick keywords
+                      3. Use the lookup tool with the most relevant 
+                         keyword
+                      4. From the resulting list of results pick the most 
+                         relevant to the user query and search for it 
+                         using the search tool 
+                      5. If you are able provide an answer from that 
+                         information, stop and answer, otherwise, start 
+                         again from step 2 but with different keywords. 
+                  </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">functions</span><span class="o">=</span><span class="p">[</span><span class="n">wikipedia_lookup</span><span class="p">,</span> <span class="n">wikipedia_search</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Notice that we have added the functions directly to the agent definition rather than appending them as before.</p>
+
+<p>The agent should use lookup and search to answer the query and then present an answer. The aim of the next prompt is to get the agent thinking. It needs to find the largest city in Scotland and then what the population of that city is.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">What is the population of the largest city in Scotland</span><span class="sh">"</span><span class="p">}]</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">wikiagent</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>The response is less than perfect but, as we shall see, it is still a good demonstration of how the tools are used.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Glasgow is the largest city in Scotland by population, but the specific 
+population number isn't provided in the summary. 
+You might need to check the most recent data from official sources such 
+as the National Records of Scotland for the exact number.
+</code></pre></div></div>
+
+<p>We could probably do a little better by adjusting the user and system prompts. But the interesting thing is the process. Here are all the messages:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Tool call: [{'id': 'call_DkOUR7CXi3Zr3nLvEESaG96N', 
+             'function': {'arguments': '{"q":"Largest city in Scotland"}',
+             'name': 'wikipedia_lookup'}, 'type': 'function'}]
+Content: None
+Content: This list of towns and cities in Scotland with a population of more than 15,000 is ordered by population, as defined and compiled by the National Records of Scotland organisation. Glasgow is the largest city in Scotland by population, whilst the capital city, Edinburgh, is the second largest by population and largest by area (although the Aberdeen and Edinburgh local authority areas contain far more undeveloped land and have a lower population density than the council areas of Dundee and Glasgow; these are the only four city-districts in the country). The city of Stirling has the smallest population amongst Scotland's cities, with an estimated population of just over 37,000 inhabitants. In total, Scotland consists of eight cities, with multiple larger towns, the largest town being Paisley. 
+The section "Localities" contains a list of basic populated areas ordered by population. The section "Settlements" is a list of populated urban areas, some of which are composed of more than one locality, and which may span across the boundaries of more than one council area.
+All localities are either settlements themselves, or contained within larger settlements. As of 2020, there are 656 localities in Scotland, and 514 settlements (i.e. 142 of the localities combine as elements of larger settlements).
+Tool call: [{'id': 'call_FQ5FjV3SvB8mShL56sn7fK35', 
+             'function': {'arguments': '{"q":"Glasgow population"}', 
+             'name': 'wikipedia_search'}, 
+             'type': 'function'}]
+Content: None
+Content: Glasgow
+Tool call: [{'id': 'call_dIrT5i9e9YeLK083yCoLPwe0', 
+             'function': {'arguments': '{"q":"Glasgow demographics"}', 
+             'name': 'wikipedia_search'}, 
+             'type': 'function'}]
+Content: Glasgow is the largest city in Scotland by population. To find the exact population size, I'll check the details for Glasgow.
+Content: Demographics of Glasgow
+Tool call: [{'id': 'call_h2i0ckryAaPW16vUnEpJQzW9', 
+             'function': {'arguments': '{"q":"Demographics of Glasgow"}',
+             'name': 'wikipedia_lookup'}, 
+             'type': 'function'}]
+Content: None
+Content: Glasgow is the most populous city in Scotland and the fourth most populous city in the United Kingdom.
+</code></pre></div></div>
+
+<p>While we haven’t got the answer we were hoping for we can clearly see how the agent uses the different tools in its attempt to work its way to an answer.</p>
+
+<p>Next, we will look at a workflow that demonstrates handoff between agents (and which is a little more successful).</p>
+
+<h3 id="a-simple-workflow-with-one-agent-handing-off-to-another">A simple workflow with one agent handing off to another</h3>
+
+<p>Now we will design a system that does work well. It looks up information about a location from Wikipedia and then passes this information on to a Public Relations agent whose job is to produce a short PR briefing on that location.</p>
+
+<p>In addition, we ask the PR agent to explain how it constructed its response from the original Wikipedia material (this is to make sure that the PR agent really is using the data from the original lookup).</p>
+
+<p>Below, we see the definition of two agents: the first looks up a location, and the second performs the PR task. So that the first agent can handoff to the PR agent, we have defined a tool <code class="language-plaintext highlighter-rouge">transfer_to_pr_agent</code> and included that in the first agent’s definition.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">transfer_to_pr_agent</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">pr_agent</span>
+
+<span class="n">agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Agent</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="o">=</span><span class="sh">"""</span><span class="s">You are a helpful agent that answers user queries by 
+                    finding and analysing information from Wikipedia.
+                    You will be given a city or other location and you 
+                    must retrieve it</span><span class="sh">'</span><span class="s">s entry on Wikipedia and then hand 
+                    over to the PR Agent.</span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">functions</span><span class="o">=</span><span class="p">[</span><span class="n">wikipedia_lookup</span><span class="p">,</span> <span class="n">transfer_to_pr_agent</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">pr_agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">PR Agent</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">instructions</span><span class="o">=</span><span class="sh">"""</span><span class="s">You are an experienced PR copywriter. 
+                    Use only the information retrieved from Wikipedia to 
+                    write an enthusiastic 100-word summary of the topic 
+                    that would be suitable for a promotional campaign.
+                    Explain how you used the original material to create 
+                    the result</span><span class="sh">"""</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>We use it thus:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Paris</span><span class="sh">"</span><span class="p">}]</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>And the response is an upbeat puff piece for Paris. Following that we have the description of how the PR agent used the Wikipedia text to create its result.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Welcome to Paris, the breathtaking capital of France, 
+where romance dances in the air and culture knows no 
+bounds! As the heart of finance, fashion, and gastronomy 
+since the 17th century, Paris shines as the iconic <span class="se">\"</span>City 
+of Light,<span class="se">\"</span> home to 2.1 million welcoming residents and a
+treasury of art and history. With world-renowned landmarks
+like the Louvre, the majestic Seine, and a vibrant arts 
+scene, Paris captivates 12 million visitors in its embrace. 
+Experience seamless connections through thriving transport 
+networks, indulge in epicurean delights, and feel the 
+pulse of creativity and innovation in this unparalleled 
+metropolis. Paris awaits your discovery!
+<span class="p">
+---
+</span>
+I crafted this exciting summary by highlighting key 
+aspects from the Wikipedia entry on Paris. The content 
+emphasized the city's historic importance as a cultural, 
+financial, and gastronomical hub while accentuating its 
+renowned symbols like the Louvre and the Seine. The 
+population and importance of its transport system, 
+alongside the notion of Paris being a vibrant visitor 
+destination, were weaved into engaging phrases to capture 
+the unique essence of Paris as a global icon.
+</code></pre></div></div>
+
+<p>If we look at the complete list of messages we can see the handoff (I’ve truncated some of the output for brevity).</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Tool call: [{'id': 'call_5KAWDJeA6vDx0gwPPyFPM0et', 
+             'function': {'arguments': '{"q":"Paris"}', 
+             'name': 'wikipedia_lookup'}, 
+             'type': 'function'}]
+Content: None
+Content: Paris (French pronunciation: [paʁi] ) is the capital and...
+
+Tool call: [{'id': 'call_ahCllvYoiZR2RXCoTszlHlMO', 
+             'function': {'arguments': '{}', 
+             'name': 'transfer_to_pr_agent'}, 
+             'type': 'function'}]
+Content: None
+Content: {"assistant": "PR Agent"}
+Tool call: None
+Content: Welcome to Paris, the breathtaking capital of France...
+<span class="p">
+---
+</span>
+I crafted this exciting summary by highlighting key aspects from...
+</code></pre></div></div>
+
+<p>You can see that this agent system works well. There is the original lookup from Wikipedia followed by a handoff to the PR agent which then produces the result required.</p>
+
+<p>What more could you ask for? (I can see PR directors rubbing their hands with glee and considering replacing their expensive executives with simple LLM prompts!)</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>In an attempt to keep things simple, we have used examples that are not particularly functional but demonstrate the processes involved in multi-agent systems. Leading on from that, we learn from this exercise that, unlike programming which is precise and deterministic, prompting an LLM is not and, as with the tool-using example,  we do not necessarily get the result that we want from the prompt that we design.</p>
+
+<p>Nevertheless, I think that we can see how the fundamental elements of routines (agents, prompts and tools)  and handoffs work in Swarm to enable the construction of a useful multi-agent system.</p>
+
+<p>I hope this has been a useful introduction to Swarm. There is much more to it than would fit into an article like this and I would encourage you to look at the docs on GitHub[2] for more details and examples.</p>
+
+<hr />
+
+<p>As ever, thanks for reading, I hope that this quick run through Swarm has been useful. You can see more of my articles on my <a href="alanjones2.github.io">website</a> and can find out when I publish new stuff by subscribing to my occasional <a href="technofile.substack.com">newsletter</a>. Most of my stuff is also on <a href="https://medium.com/@alan-jones">Medium</a> (paywalled).</p>
+
+<p>The code for this article can be found in this <a href="https://github.com/alanjones2/swarmapps">GitHub repo</a>.</p>
+
+<h3 id="notes-and-references">Notes and references</h3>
+
+<ol>
+  <li>My personal preference is to use VSCode because I can edit different types of file, Notebooks, Python programs and Markdown files, for example. VSCode also allows me to easily push my code to my GitHub repository. I’ve not kept my eye on Jupyter developments but I realise, now, that you can do all this with Juypter Lab, too, (with the right extensions) but I haven’t explored this as an option, yet.</li>
+  <li>You can find the Swarm documentation on <a href="https://github.com/openai/swarm/blob/main/README.md">GitHub</a>. Swarm is MIT-licensed.</li>
+  <li>Disclaimer: I have no commercial connection with any company mentioned in this article.</li>
+</ol>]]></content><author><name></name></author><summary type="html"><![CDATA[Build multi-agent systems with Swarm, a back-to-basics framework]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://github.com/alanjones2/swarmapps/blob/main/images/swarmtext.png?raw=true" /><media:content medium="image" url="https://github.com/alanjones2/swarmapps/blob/main/images/swarmtext.png?raw=true" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Hands on Data Visualization with Google Mesop</title><link href="http://localhost:4000/2024/10/26/atavizmesop.html" rel="alternate" type="text/html" title="Hands on Data Visualization with Google Mesop" /><published>2024-10-26T00:00:00+02:00</published><updated>2024-10-26T00:00:00+02:00</updated><id>http://localhost:4000/2024/10/26/atavizmesop</id><content type="html" xml:base="http://localhost:4000/2024/10/26/atavizmesop.html"><![CDATA[<p><img src="https://github.com/alanjones2/mesopapps/blob/main/CO2/images/front.png?raw=true" alt="" /></p>
 
 <p>By combining Mesop’s simple yet powerful UI components with Plotly’s comprehensive charting capabilities, you can build a dynamic, interactive app to showcase data visualizations in Python.</p>
 
@@ -2663,4 +3080,4 @@ Imagine your organisation has decided to use Streamlit as its primary platform f
 
 <p><em>Links to Amazon are affiliate links which means if you purchase something I may get a small commission but it will not affect the price you pay</em></p>
 
-<p>All images and screenshots are by me, the author, unless otherwise noted.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[We code examples using Altair, Bokeh, Plotly, Pandas Plot and Matplotlib, to illustrate the pros and cons of each one]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" /><media:content medium="image" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">ChatGPT Prompting for Coders - a Prototyping Approach</title><link href="http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach.html" rel="alternate" type="text/html" title="ChatGPT Prompting for Coders - a Prototyping Approach" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach</id><content type="html" xml:base="http://localhost:4000/2024/01/01/ChatGPT-Prompting-for-Coders-a-Prototyping-Approach.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[A suitable prompting technique can make the development of usable code with ChatGPT quite painless. Here we prototype a Streamlit app for tracking cryptocurrency.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://miro.medium.com/v2/resize:fit:786/format:webp/1*0YOew4uEABFAEIp87uyw-Q.png" /><media:content medium="image" url="https://miro.medium.com/v2/resize:fit:786/format:webp/1*0YOew4uEABFAEIp87uyw-Q.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an AI-Generated Streamlit Application with an OpenAI Assistant</title><link href="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html" rel="alternate" type="text/html" title="Create an AI-Generated Streamlit Application with an OpenAI Assistant" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[We use the OpenAI Playground and code completion tools to create a Streamlit app with interactive Plotly charts]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" /><media:content medium="image" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an Interactive Web App with PyScript and Pandas</title><link href="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html" rel="alternate" type="text/html" title="Create an Interactive Web App with PyScript and Pandas" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[PyScript allows us to create a serverless web application with HTML and Python as the scripting language.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" /><media:content medium="image" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p>All images and screenshots are by me, the author, unless otherwise noted.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[We code examples using Altair, Bokeh, Plotly, Pandas Plot and Matplotlib, to illustrate the pros and cons of each one]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" /><media:content medium="image" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an AI-Generated Streamlit Application with an OpenAI Assistant</title><link href="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html" rel="alternate" type="text/html" title="Create an AI-Generated Streamlit Application with an OpenAI Assistant" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-AI-Generated-Streamlit-Application-with-an-OpenAI-Assistant.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[We use the OpenAI Playground and code completion tools to create a Streamlit app with interactive Plotly charts]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" /><media:content medium="image" url="https://alanjones2.github.io/articles/app_maker/images/Screenshot_app.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an Interactive Web App with PyScript and Pandas</title><link href="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html" rel="alternate" type="text/html" title="Create an Interactive Web App with PyScript and Pandas" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[PyScript allows us to create a serverless web application with HTML and Python as the scripting language.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" /><media:content medium="image" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
