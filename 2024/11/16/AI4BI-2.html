@@ -22,6 +22,17 @@
       </time></p>
   </header>
 
+  <!-- Google Analytics-->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VDYY6RYRK1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+
+      gtag('config', 'G-VDYY6RYRK1');
+  </script>
+
   <div class="row">
     <div class="col-sm-9">
       <div class="post-content e-content" itemprop="articleBody">
@@ -250,7 +261,7 @@
                     5. Are there any trends that you can detect?
 
                     The overview of the data and the corresponding charts from </span><span class="si">{</span><span class="n">files</span><span class="si">}</span><span class="s"> should be included in an appendix.
-                    
+
                     Save the result in the file </span><span class="sh">'</span><span class="s">./report.md</span><span class="sh">'</span><span class="s">.
                     </span><span class="sh">"""</span><span class="p">,</span>
     <span class="n">expected_output</span><span class="o">=</span><span class="sh">"""</span><span class="s">A markdown file</span><span class="sh">"""</span><span class="p">,</span>
@@ -266,6 +277,7 @@
 <span class="p">)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">crew</span><span class="p">.</span><span class="nf">kickoff</span><span class="p">()</span>
 </code></pre></div></div>
+
 <p>The resulting report is too long to include in the text, so I’ve appended it to the end of the article. However, the program makes a reasonable attempt to answer the questions and faithfully includes the charts.</p>
 
 <p>The report is short and a more sophisticated prompt might well result in something more comprehensive. However, when designing the prompt, one has to be careful not to provide inappropriate hints to the LLM. For example, I cut and pasted some suggestions from a ChatGPT session which included questions about supply chain problems. Of course, there is no way that you could deduce such a problem from the data given but the LLM hallucinated a fictitious supply chain problem to explain a downturn in sales!</p>
@@ -307,17 +319,22 @@
 <h1 id="sales-performance-report">Sales Performance Report</h1>
 
 <h2 id="executive-summary">Executive Summary</h2>
+
 <p>This report analyzes the sales performance of the company over the reporting period, highlighting overall revenue, top-selling items, regional performance, growth trends, and notable observations. The analysis is based on sales data for various product categories, monthly sales figures, and regional performance metrics.</p>
 
 <h2 id="sales-overview">Sales Overview</h2>
 
 <ol>
-  <li><strong>Overall Revenue for Latest Month:</strong>
+  <li>
+    <p><strong>Overall Revenue for Latest Month:</strong></p>
+
     <ul>
       <li><strong>August Total Revenue:</strong> $4,000,000</li>
     </ul>
   </li>
-  <li><strong>Top Selling 5 Items:</strong>
+  <li>
+    <p><strong>Top Selling 5 Items:</strong></p>
+
     <ul>
       <li>
         <ol>
@@ -346,7 +363,9 @@
       </li>
     </ul>
   </li>
-  <li><strong>Regions with Most Sales:</strong>
+  <li>
+    <p><strong>Regions with Most Sales:</strong></p>
+
     <ul>
       <li><strong>North America:</strong>
         <ul>
@@ -380,12 +399,16 @@
       </li>
     </ul>
   </li>
-  <li><strong>Growth Over the Reporting Period:</strong>
+  <li>
+    <p><strong>Growth Over the Reporting Period:</strong></p>
+
     <ul>
       <li>The overall trend shows a consistent increase in sales. For instance, revenue grew from $3,500,000 in January to $4,000,000 in August, indicating a gradual upward trajectory in sales performance.</li>
     </ul>
   </li>
-  <li><strong>Trends Detected:</strong>
+  <li>
+    <p><strong>Trends Detected:</strong></p>
+
     <ul>
       <li>There has been a steady growth in sales of electronics, particularly smartphones and laptops.</li>
       <li>Seasonality might affect sales, as evidenced by fluctuating monthly performance.</li>
