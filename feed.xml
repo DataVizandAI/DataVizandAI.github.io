@@ -1,4 +1,424 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-12-13T18:41:42+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">AI for BI: Building a Business Information Report with CrewAI and OpenAI</title><link href="http://localhost:4000/2024/11/16/AI4BI-2.html" rel="alternate" type="text/html" title="AI for BI: Building a Business Information Report with CrewAI and OpenAI" /><published>2024-11-16T00:00:00+01:00</published><updated>2024-11-16T00:00:00+01:00</updated><id>http://localhost:4000/2024/11/16/AI4BI-2</id><content type="html" xml:base="http://localhost:4000/2024/11/16/AI4BI-2.html"><![CDATA[<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/AIB!.png?raw=true" alt="" />
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-12-18T16:23:35+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">AI for BI: Transform Customer Feedback into Actionable Insights with CrewAI and Streamlit</title><link href="http://localhost:4000/2024/12/18/custfb-to-streamlit.html" rel="alternate" type="text/html" title="AI for BI: Transform Customer Feedback into Actionable Insights with CrewAI and Streamlit" /><published>2024-12-18T00:00:00+01:00</published><updated>2024-12-18T00:00:00+01:00</updated><id>http://localhost:4000/2024/12/18/-custfb-to-streamlit</id><content type="html" xml:base="http://localhost:4000/2024/12/18/custfb-to-streamlit.html"><![CDATA[<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/chartblue.png?raw=true" alt="" /></p>
+
+<p><em>Based on Image by <a href="https://pixabay.com/users/colibrie-15745216/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=9126721">Temel</a> from <a href="https://pixabay.com//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=9126721">Pixabay</a></em></p>
+
+<p>New AI agent tools have made automating data analysis remarkably simple. When combined with a visualisation platform like Streamlit, it is a simple task to create a visually compelling business reporting app.</p>
+
+<p>In this tutorial, we will focus on analysing customer feedback. This analysis and a good understanding of customer sentiment are essential to ensure products meet expectations and that quality concerns are addressed. Products perceived as poor quality simply won’t sell.</p>
+
+<p>However, analysing customer feedback can involve processing a large volume of unstructured data—a task that can be daunting. This is where large language models excel, making it possible to extract meaningful insights from this data.</p>
+
+<p>Our first step is to clarify the objective.</p>
+
+<p>Imagine we have a list of customer feedback messages about products from an online retailer. Our goal is to generate an executive report that highlights top-performing products, identifies issues with underperforming ones, and includes compelling visualizations of customer sentiment.</p>
+
+<p>We are going to use CrewAI to orchestrate a handful of AI agents that will structure the data, analyse it, create an insightful report and finally, build a Streamlit app to present the results.</p>
+
+<p>It will look like the screenshot, below.</p>
+
+<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/Screenshot-fb-reporter-app.png?raw=true" alt="" /></p>
+
+<p>First, we need to define precisely what we want to do.</p>
+
+<p>I have a list of fictional customer feedback messages about products from an online retailer. The messages are in Markdown format. I want to generate an executive report that highlights products that perform well, identifies issues with those that perform badly and includes some interactive charts on customer sentiment. And I want all of this to be in an interactive web app.</p>
+
+<p>So, let’s define the steps we need to take.</p>
+
+<h3 id="defining-the-process">Defining the process</h3>
+
+<p>Here is the list of steps:</p>
+
+<ol>
+  <li>
+    <p>Convert the raw customer data and create a structured version - probably CSV. This should make further analysis easier and it is something I can use directly in the resulting app.</p>
+  </li>
+  <li>
+    <p>Calculate the sentiment of each customer message and add this to the structured data.</p>
+  </li>
+  <li>
+    <p>Write a report that summarises the data in a table and includes sections that identify the best-performing products, those with quality problems and general issues that need to be addressed. The report should be formatted as Markdown.</p>
+  </li>
+  <li>
+    <p>Create a Streamlit app that displays the report in one column and some interactive charts that show customer satisfaction in a second column.</p>
+  </li>
+  <li>
+    <p>Make the structured customer feedback data available as a table in the app.</p>
+  </li>
+</ol>
+
+<p>As with my previous article, <a href="https://datavizandai.github.io/2024/11/16/AI4BI-2.html"><em>AI for BI: Building a Business Information Report with CrewAI and OpenAI</em></a>, I used CrewAI and OpenAI to build this software. The reasons are the same, it’s not because they are necessarily the best technical solutions for this problem but they are convenient, easy to use and they do the job.</p>
+
+<p>I used a Jupyter Notebook to write the analysis code, so most of the code you see below can be written directly into a notebook cell in the order it is presented. (To create a standalone app, simply concatenate  the cells.)</p>
+
+<p>The reporter program in Streamlit is separate and is created by the AI. You will find all of the code and data in my GitHub repo.</p>
+
+<p>As we will use the OpenAI API, you need an API key which should be accessible as an environment variable. If it is not yet stored as an environment variable, you can run the following code block first to ensure it is.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Omit this if your API key is already set as an environment variable
+
+import os
+os.environ["OPENAI_API_KEY"] = "your api key"
+</code></pre></div></div>
+
+<p>OpenAI will charge you for using their LLM. However, running the code below should cost no more than a few cents (but keep an eye on your usage in the OpenAI dashboard). The CrewAI software that we use is open source and costs nothing.</p>
+
+<p>Let’s get on with the coding.</p>
+
+<h3 id="writing-the-code">Writing the code</h3>
+
+<p>I’ve outlined the steps that we will go through, above. These can be grouped into three stages: convert the raw data to CSV, write a report and create a Streamlit app. We will define agents and tasks for each stage and save the results. So we’ll end up with three files, the structured data in a CSV file, the report in a Markdown file and the Streamlit app.</p>
+
+<p>There are two advantages to saving the intermediate files. The first is that, if we wish, we can run each of the three stages independently of the others. If we want to tweak the report’s structure, for example, there is no need to re-create the CSV file, we can use one we prepared earlier. And if the Streamlit app needs work it can be done independently of the rest of the coding. The second advantage is that the resulting app can use these files.</p>
+
+<p>This is how we shall proceed but, before we get to the main code, a bit of setting up is required.</p>
+
+<p>We need to import stuff from CrewAI and set the LLM model. As I said before, CrewAI defaults to using the OpenAI API so, as long as we have an API key, all we need to do is set the model we want to use in the variable <code class="language-plaintext highlighter-rouge">llm</code>. I have also set the <em>temperature</em> to zero. This reduces the randomness for a more consistent response.</p>
+
+<p>I’ve also set a flag, <code class="language-plaintext highlighter-rouge">DEBUG</code>. This is used to control the verbosity of the agent response. For debugging purposes, it’s a good idea to have a full response to see how the agents process requests. Set <code class="language-plaintext highlighter-rouge">DEBUG</code> to <code class="language-plaintext highlighter-rouge">True</code> for this.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">crewai</span> <span class="kn">import</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Crew</span><span class="p">,</span> <span class="n">LLM</span>
+
+<span class="n">llm</span> <span class="o">=</span> <span class="nc">LLM</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="sh">"</span><span class="s">gpt-4o-mini</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span>
+<span class="p">)</span>
+
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="bp">False</span>
+</code></pre></div></div>
+
+<p>The next part of the code defines some file names. The first is the raw customer data file. The next two files will store intermediate data for the Streamlit app and the last one is the app itself.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># files
+</span>
+<span class="n">fb_raw</span> <span class="o">=</span>    <span class="sh">"</span><span class="s">./data/clothes.md</span><span class="sh">"</span>
+
+<span class="n">fb_csv</span> <span class="o">=</span>    <span class="sh">"</span><span class="s">./data/fb.csv</span><span class="sh">"</span>
+<span class="n">report_md</span> <span class="o">=</span> <span class="sh">"</span><span class="s">./data/report.md</span><span class="sh">"</span>
+<span class="n">st_app</span> <span class="o">=</span>    <span class="sh">"</span><span class="s">./data/report.py</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<p>Now we import the CrewAI tools required to read and write files and assign them to variables.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">crewai_tools</span> <span class="kn">import</span> <span class="n">FileReadTool</span><span class="p">,</span> <span class="n">FileWriterTool</span>
+
+<span class="n">file_read_tool</span> <span class="o">=</span> <span class="nc">FileReadTool</span><span class="p">()</span>
+<span class="n">file_writer_tool</span> <span class="o">=</span> <span class="nc">FileWriterTool</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>That’s all the preamble code out of the way and we can start on the main program.</p>
+
+<p>CrewAI apps have three essential components: agents, tasks and crews. An agent is the interface to the LLM; it has a particular purpose and can be provided with functions (tools) to help it. A task details something that needs to be done by an agent. Finally, a crew executes a list of tasks and agents and returns a result.</p>
+
+<p>We will define three agents that map onto the stages outlined above. One to create and modify a CSV file, another to write a report in Markdown and a third to build the Streamlit app.</p>
+
+<p>Each agent is provided with one or more tasks and these agent/task combinations will be managed by a <em>crew</em>.</p>
+
+<h3 id="csv-agent">CSV agent</h3>
+
+<p>The first agent’s task is to construct a data structure from the raw Markdown file of customer feedback, then calculate customer sentiment and add that to the data structure.</p>
+
+<p>There is no strict distinction between the attributes of the agent and the task. The task has a <code class="language-plaintext highlighter-rouge">description</code> and the agent has three descriptive attributes <code class="language-plaintext highlighter-rouge">role</code>, <code class="language-plaintext highlighter-rouge">goal</code> and <code class="language-plaintext highlighter-rouge">backstory</code>.  Each contributes towards a meaningful prompt that will be generated by CrewAI but it is ultimately up to us how we use them.</p>
+
+<p>My approach here is to be concise in the agent definition and leave a detailed description of what the agent has to do for the task.</p>
+
+<p>Using this approach, I can use the same agent for more than one task, as we shall see.</p>
+
+<p>Here’s my definition of the CSV agent.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">csv_agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+        <span class="n">role</span><span class="o">=</span><span class="sh">"</span><span class="s">Extract, process data and record data</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">goal</span><span class="o">=</span><span class="sh">"""</span><span class="s">Extract data and organise as instructed. 
+                The result MUST be valid CSV.</span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">backstory</span><span class="o">=</span><span class="sh">"""</span><span class="s">You are a data processing agent</span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_read_tool</span><span class="p">],</span>
+        <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>And here is the first task.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">create_CSV</span> <span class="o">=</span> <span class="nc">Task</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">"""</span><span class="s"> 
+                Analyse </span><span class="sh">'</span><span class="s">{input_file}</span><span class="sh">'</span><span class="s"> the data provided - it is in 
+                Markdown format. 
+                Your output should be in CSV format. Respond without 
+                using Markdown code fences.
+
+                The data is about the range of items in an online shop.
+                Following this is a set of messages from customers giving 
+                feedback about the products that they have purchased.
+
+                Your task is to:
+                   Create a structured file in CSV format that records a 
+                   list of all customer feedback messages.
+                   Each item in the list should have its columns 
+                   populated as follows.
+
+                        </span><span class="sh">"</span><span class="s">Product</span><span class="sh">"</span><span class="s">: insert the name of the item, 
+                        </span><span class="sh">"</span><span class="s">Overall_Rating</span><span class="sh">"</span><span class="s">: insert the rating as given by customer, 
+                        </span><span class="sh">"</span><span class="s">Issue</span><span class="sh">"</span><span class="s">: insert any issues identified - if no issue can be identified write </span><span class="sh">'</span><span class="s">None</span><span class="sh">'</span><span class="s">, 
+                        </span><span class="sh">"</span><span class="s">Review</span><span class="sh">"</span><span class="s">: insert the customer message 
+                </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">expected_output</span><span class="o">=</span><span class="sh">"</span><span class="s">A correctly formatted CSV data structure</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">agent</span><span class="o">=</span><span class="n">csv_agent</span><span class="p">,</span>   
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_read_tool</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>The task is much more explicit and tells the agent exactly what to do. The result should be a CSV structure with four columns.</p>
+
+<p>We also want a fifth column that holds the sentiment of each message. So as not to overcomplicate the prompts, I assign this to a second task.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">add_sentiment</span> <span class="o">=</span> <span class="nc">Task</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">"""</span><span class="s"> 
+                Analyse CSV data and calculate the sentiment of each 
+                message in the </span><span class="sh">'</span><span class="s">Review</span><span class="sh">'</span><span class="s"> column. Add a new column to the 
+                CSV that records that sentiment.
+                Your output should be in CSV format. Respond without 
+                using Markdown code fences.              
+                </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">expected_output</span><span class="o">=</span><span class="sh">"</span><span class="s">A correctly formatted CSV data file</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">agent</span><span class="o">=</span><span class="n">csv_agent</span><span class="p">,</span>   
+    <span class="n">output_file</span><span class="o">=</span><span class="n">fb_csv</span><span class="p">,</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_read_tool</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Notice that in this task there is an extra attribute <code class="language-plaintext highlighter-rouge">output_file</code>which is set to the file name for the CSV file.  This tells the task to automatically place the result in that file.</p>
+
+<p>Having defined the tasks, we execute them.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">crew</span> <span class="o">=</span> <span class="nc">Crew</span><span class="p">(</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">csv_agent</span><span class="p">,</span> <span class="n">csv_agent</span><span class="p">],</span>
+    <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">create_CSV</span><span class="p">,</span> <span class="n">add_sentiment</span><span class="p">],</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">DEBUG</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">result1</span> <span class="o">=</span> <span class="n">crew</span><span class="p">.</span><span class="nf">kickoff</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">input_file</span><span class="sh">'</span><span class="p">:</span> <span class="n">fb_raw</span><span class="p">})</span>
+</code></pre></div></div>
+
+<p>In the crew, there is a list of agents and tasks that will be executed sequentially and when the crew is run, the input file name is set as a parameter. Notice that we have two tasks that use the same agent.</p>
+
+<p>Once complete we will have a CSV file with a structure something like this:</p>
+
+<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/customer-feedback-df.png?raw=true" alt="" /></p>
+
+<p>Our next job is to write a report.</p>
+
+<h3 id="report-writing-agent">Report writing agent</h3>
+
+<p>We now have some nicely formatted data that has been enhanced with a customer sentiment assessment and saved in a file for later use.</p>
+
+<p>Our next job is to attempt a deeper analysis of the data with a new agent.</p>
+
+<p>Once again, the agent definition is short and the detail of the work to be done is in the task.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Define agent
+</span><span class="n">report_generator</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+        <span class="n">role</span><span class="o">=</span><span class="sh">"</span><span class="s">Compile and present results</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">goal</span><span class="o">=</span><span class="sh">"""</span><span class="s">Deliver a polished, structured report on customer 
+                satisfaction.
+             </span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">backstory</span><span class="o">=</span><span class="sh">"""</span><span class="s">You are an agent, that generates clear, 
+                     well-designed and professional reports</span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_read_tool</span><span class="p">],</span>
+        <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>The task defines precisely what the report should look like and what it should contain.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">create_report</span> <span class="o">=</span> <span class="nc">Task</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+            Read the CSV data in </span><span class="sh">'</span><span class="s">{csv_file}</span><span class="sh">'</span><span class="s">, create a summary report.
+            The report must consolidate and summarize the customer 
+            feedback, it should be in Markdown file format 
+            (without ``` fences). 
+
+            The report should be structured as follows:
+
+                # Product review report
+
+                ### Summary
+
+                Insert a Markdown table with a row for every product.
+                The table header should look like this:
+
+                | Product | Average Rating | Number of reviews | Positive | Neutral | Negative |
+
+                The should be a row for every product like this:
+
+                | insert the product name here 
+                | insert the average of all the rating for this product 
+                | insert total number of reviews
+                | insert number of positive reviews 
+                | insert number of neutral reviews 
+                | insert number of negative reviews |
+
+                ### Insights
+
+                #### Best performers
+
+                insert a short report on the products with the best reviews
+
+                #### Underperformers
+
+                insert a short report on the products that are underperforming
+
+                #### Issues
+
+                insert a short report on what steps need to be taken to improve products and sales
+    </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">expected_output</span><span class="o">=</span><span class="sh">"""</span><span class="s">A Markdown report file</span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">agent</span><span class="o">=</span><span class="n">report_generator</span><span class="p">,</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">report_md</span><span class="p">,</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_read_tool</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>CrewAI does a good job of producing a report and the result is saved in <code class="language-plaintext highlighter-rouge">report_md</code>by executing the following crew.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">crew</span> <span class="o">=</span> <span class="nc">Crew</span><span class="p">(</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">report_generator</span><span class="p">],</span>
+    <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">create_report</span><span class="p">],</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">DEBUG</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">result2</span> <span class="o">=</span> <span class="n">crew</span><span class="p">.</span><span class="nf">kickoff</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">input_file</span><span class="sh">'</span><span class="p">:</span><span class="n">fb_raw</span><span class="p">,</span> <span class="sh">'</span><span class="s">csv_file</span><span class="sh">'</span><span class="p">:</span> <span class="n">fb_csv</span><span class="p">})</span>
+</code></pre></div></div>
+
+<p>You can see the full report in my GitHub repo but below is a screenshot of the report part of the app so you can see the sort of thing that is produced.</p>
+
+<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/report_screen_shot.png?raw=true" alt="" /></p>
+
+<p>Next, we want to generate the app.</p>
+
+<h3 id="streamlit-app">Streamlit app</h3>
+
+<p>I’ve tried to make the app as general as possible so that it will cope with different sets of feedback messages about different products.</p>
+
+<p>Consequently, you only need to run this part of the code once. You’ll then have a Streamlit app that will read the CSV files and Markdown report that we generated earlier or, indeed, ones we create later.</p>
+
+<p>I tackle the app generation in two parts using two tasks but with the same Streamlit generating agent.</p>
+
+<p>Here is the agent definition.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Define agent
+</span><span class="n">app_generator</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+        <span class="n">role</span><span class="o">=</span><span class="sh">"</span><span class="s">Create or modify a Streamlit program</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">goal</span><span class="o">=</span><span class="sh">"""</span><span class="s">To deliver a valid, Streamlit program  in Python, with 
+                meaningful variable and function names.
+                Ensure that the output strictly conforms to Python syntax.
+                Do not include ``` fencing.
+           </span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">backstory</span><span class="o">=</span><span class="sh">"""</span><span class="s">You are an agent that generates clear, well-designed
+                     Streamlit programs</span><span class="sh">"""</span><span class="p">,</span>
+        <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_writer_tool</span><span class="p">,</span> <span class="n">file_read_tool</span><span class="p">],</span>
+        <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now for the first task. It sets up the basic app and loads the CSV data as a Pandas dataframe. I had to tell it about a (now fairly old) update to the Streamlit API. An earlier version used the decorator <code class="language-plaintext highlighter-rouge">st.cache</code>, this is deprecated and we should use <code class="language-plaintext highlighter-rouge">st.cache_data</code> to cache the CSV data instead. I was quite surprised at this as the new decorator has been around for a while now. However, the problem was easily solved as you can see.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">create_app</span> <span class="o">=</span> <span class="nc">Task</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+            Create a Streamlit app as follows:
+            - set the display to wide format
+            - include the pandas and ploty express libraries
+            - create a pandas dataframe called </span><span class="sh">"</span><span class="s">df</span><span class="sh">"</span><span class="s"> from the csv file 
+              {csv_file} include all fields
+            Note that st.cache is deprecated, use st.cache_data instead.
+
+            Don</span><span class="sh">'</span><span class="s">t save the program to a file.
+
+    </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">expected_output</span><span class="o">=</span><span class="sh">"""</span><span class="s">A valid and syntactically correct Python program</span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">agent</span><span class="o">=</span><span class="n">app_generator</span><span class="p">,</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_read_tool</span><span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now we have a basic program. In the next task, I give explicit instructions on how to add to this program to display the data and construct the charts.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">add_content</span> <span class="o">=</span> <span class="nc">Task</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="sh">"""</span><span class="s">
+            Modify the Streamlit code as follows:
+            - create two tabs, the first named </span><span class="sh">"</span><span class="s">report_tab</span><span class="sh">"</span><span class="s"> the second 
+              named </span><span class="sh">"</span><span class="s">messages_tab</span><span class="sh">"</span><span class="s">
+            - in </span><span class="sh">"</span><span class="s">messages_tab</span><span class="sh">"</span><span class="s"> load the dataframe, </span><span class="sh">"</span><span class="s">df</span><span class="sh">"</span><span class="s">, in a st.table 
+            - in report_tab create two columns of equal width called 
+              </span><span class="sh">"</span><span class="s">report_column</span><span class="sh">"</span><span class="s"> and </span><span class="sh">"</span><span class="s">chart_column</span><span class="sh">"</span><span class="s">
+            - in the column </span><span class="sh">"</span><span class="s">report_column</span><span class="sh">"</span><span class="s"> read the report from 
+              {report_file} and display it in st.markdown
+            - in the </span><span class="sh">"</span><span class="s">chart_column</span><span class="sh">"</span><span class="s"> draw a bar chart of </span><span class="sh">'</span><span class="s">Product</span><span class="sh">'</span><span class="s"> over 
+              </span><span class="sh">'</span><span class="s">Overall_Rating</span><span class="sh">'</span><span class="s">
+            - in the column </span><span class="sh">"</span><span class="s">chart_column</span><span class="sh">"</span><span class="s"> draw a histogram of </span><span class="sh">'</span><span class="s">Sentiment</span><span class="sh">'</span><span class="s"> 
+              with the bars colored by </span><span class="sh">'</span><span class="s">Product</span><span class="sh">'</span><span class="s">
+
+    </span><span class="sh">"""</span><span class="p">,</span>
+    <span class="n">expected_output</span><span class="o">=</span><span class="sh">"</span><span class="s">A valid and syntactically correct Python program</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">st_app</span><span class="p">,</span>
+    <span class="n">agent</span><span class="o">=</span><span class="n">app_generator</span><span class="p">,</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">file_read_tool</span><span class="p">]</span>   
+<span class="p">)</span>         
+</code></pre></div></div>
+
+<p>As before, we run both tasks with a single agent.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">crew</span> <span class="o">=</span> <span class="nc">Crew</span><span class="p">(</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">[</span><span class="n">app_generator</span><span class="p">,</span> <span class="n">app_generator</span><span class="p">],</span>
+    <span class="n">tasks</span><span class="o">=</span><span class="p">[</span><span class="n">create_app</span><span class="p">,</span> <span class="n">add_content</span><span class="p">],</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">DEBUG</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">result3</span> <span class="o">=</span> <span class="n">crew</span><span class="p">.</span><span class="nf">kickoff</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">csv_file</span><span class="sh">'</span><span class="p">:</span> <span class="n">fb_csv</span> <span class="p">,</span>
+                               <span class="sh">'</span><span class="s">report_file</span><span class="sh">'</span><span class="p">:</span> <span class="n">report_md</span><span class="p">})</span>
+</code></pre></div></div>
+
+<p>That’s the final stage done. Run the Streamlit app; the result will be the screenshot we saw earlier. Note that with the way I have organised the folders you will need to run Streamlit from the parent folder thus:</p>
+
+<p>` streamlit run data/report.py`</p>
+
+<h3 id="final-thoughts-on-crewai">Final thoughts on CrewAI</h3>
+
+<p>On the whole, I was quite happy with the result. CrewAI is an easy framework to get to grips with although it has a few foibles. There are a lot of descriptive strings that don’t feature in rival products and, while I’m sure that they make sense to the good folk at CrewAI, I’m not entirely convinced that they are all necessary.</p>
+
+<p>However, having said that, I do like the way we can separate a task from an agent, giving the agent a broad description of its capabilities and providing the details of what needs to be done in the task. The other framework I’ve been looking at recently (<a href="https://datavizandai.github.io/2024/11/02/hands-on-swarm.html">Swarm</a>) doesn’t allow that.</p>
+
+<p>I encountered a problem with CrewAI that I may have solved with this feature.</p>
+
+<p>I was getting the following error when running one of the crews:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Tool Output:
+
+Error: the Action Input is not a valid key, value dictionary.
+ Error parsing LLM output, agent will retry: I did it wrong. 
+Invalid Format: I missed the <span class="s1">'Action:'</span> after <span class="s1">'Thought:'</span><span class="nb">.</span> 
+I will <span class="k">do </span>right next, and don<span class="s1">'t use a tool I have already used.
+</span></code></pre></div></div>
+
+<p>Which is a little difficult to interpret.</p>
+
+<p>This seemed something to do with the complexity of the task because when I split the tasks the problem disappeared.</p>
+
+<p>However, I’m not entirely convinced that my complexity diagnosis was correct as I have been in touch with other developers who have found different solutions to what appears to be the same problem (lowering the temperature, for example - that didn’t work for me). At the time of writing, this is a live issue on the CrewAI GitHub repo.</p>
+
+<h3 id="final-thoughts-on-the-app">Final thoughts on the app</h3>
+
+<p>I was very explicit in defining the Streamlit app. You could argue that I was so explicit that I might as well have written the app myself. It’s a simple program, so there is some merit in that.</p>
+
+<p>But I wanted to produce an end-to-end program that produced the final product from the raw data. Perhaps, I could have been a little vaguer with the program definition. Perhaps, that would have resulted in a better program! But apart from the cache decorator problem, the AI produced no errors (and it types much quicker than me!) so I’m not complaining.</p>
+
+<p>The final question is why Streamlit? While it is a perfectly good framework for this sort of app, the real answer is, because ChatGPT-4o mini has the programming knowledge to use it!</p>
+
+<p>Asking ChatGPT to use a newer, or less well-known, framework such as Mesop or Taipy would have produced poorer results. The LLM ‘knows’ less about these products and is more likely to make mistakes and hallucinate.</p>
+
+<hr />
+
+<p>As ever, thanks for reading. You can see more articles on my <a href="alanjones2.github.io">website</a> and subscribe to my occasional newsletter <a href="technofile.substack.com">here</a>. Most of my stuff is also on <a href="https://medium.com/@alan-jones">Medium</a> (paywalled).</p>
+
+<hr />
+
+<p>The code and data for this article can be found in this <a href="https://github.com/alanjones2/CrewAIapps">GitHub repo</a> in the <em>AI4BI-fb</em> folder. The resulting charts and report are in the same folder.</p>
+
+<p>All illustrations are by me, the author, unless otherwise stated.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[Build an AI-powered app to analyze unstructured feedback, generate insightful reports, and create interactive visualizations]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/chartblue.png?raw=true" /><media:content medium="image" url="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/chartblue.png?raw=true" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AI for BI: Building a Business Information Report with CrewAI and OpenAI</title><link href="http://localhost:4000/2024/11/16/AI4BI-2.html" rel="alternate" type="text/html" title="AI for BI: Building a Business Information Report with CrewAI and OpenAI" /><published>2024-11-16T00:00:00+01:00</published><updated>2024-11-16T00:00:00+01:00</updated><id>http://localhost:4000/2024/11/16/AI4BI-2</id><content type="html" xml:base="http://localhost:4000/2024/11/16/AI4BI-2.html"><![CDATA[<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/AIB!.png?raw=true" alt="" />
 <em>Image drawn with ChatGPT by author</em></p>
 
 <p>Business Information applications help businesses use their data as a resource to make critical decisions and we are going to build one with AI.</p>
@@ -3479,4 +3899,4 @@ Imagine your organisation has decided to use Streamlit as its primary platform f
 
 <p><em>Links to Amazon are affiliate links which means if you purchase something I may get a small commission but it will not affect the price you pay</em></p>
 
-<p>All images and screenshots are by me, the author, unless otherwise noted.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[We code examples using Altair, Bokeh, Plotly, Pandas Plot and Matplotlib, to illustrate the pros and cons of each one]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" /><media:content medium="image" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Create an Interactive Web App with PyScript and Pandas</title><link href="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html" rel="alternate" type="text/html" title="Create an Interactive Web App with PyScript and Pandas" /><published>2024-01-01T00:00:00+01:00</published><updated>2024-01-01T00:00:00+01:00</updated><id>http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas</id><content type="html" xml:base="http://localhost:4000/2024/01/01/Create-an-Interactive-Web-App-with-PyScript-and-Pandas.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[PyScript allows us to create a serverless web application with HTML and Python as the scripting language.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" /><media:content medium="image" url="https://raw.githubusercontent.com/alanjones2/Alan-Jones-article-code/master/pyscript/images/Screenshot2.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p>All images and screenshots are by me, the author, unless otherwise noted.</p>]]></content><author><name></name></author><summary type="html"><![CDATA[We code examples using Altair, Bokeh, Plotly, Pandas Plot and Matplotlib, to illustrate the pros and cons of each one]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" /><media:content medium="image" url="http://localhost:4000/assets/images/streamlit5varieties/rowcharts.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
