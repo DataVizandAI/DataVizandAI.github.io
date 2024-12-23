@@ -98,7 +98,7 @@ import os
 os.environ["OPENAI_API_KEY"] = "your api key"
 </code></pre></div></div>
 
-<p>OpenAI will charge you for using their LLM. However, running the code below should cost no more than a few cents (but keep an eye on your usage in the OpenAI dashboard). The CrewAI software that we use is open source and costs nothing.</p>
+<p>OpenAI will charge you for using their LLM. However, running the code below should cost no more than a few cents (but you <strong>MUST</strong> keep an eye on your usage in the OpenAI dashboard — things go wrong sometimes! It is also a good idea to set a monthly limit on your spending.)). The CrewAI software that we use is open source and costs nothing.</p>
 
 <p>Let’s get on with the coding.</p>
 
@@ -437,6 +437,8 @@ I will <span class="k">do </span>right next, and don<span class="s1">'t use a to
 <p>This seemed something to do with the complexity of the task because when I split the tasks the problem disappeared.</p>
 
 <p>However, I’m not entirely convinced that my complexity diagnosis was correct as I have been in touch with other developers who have found different solutions to what appears to be the same problem (lowering the temperature, for example - that didn’t work for me). At the time of writing, this is a live issue on the CrewAI GitHub repo.</p>
+
+<p><strong><em>Update: that bug was intermittent and has happened again with the code, above You should keep an eye on the output when running this code. It could loop infinitely and if not stopped you might end up with a large bill.</em></strong></p>
 
 <h3 id="final-thoughts-on-the-app">Final thoughts on the app</h3>
 

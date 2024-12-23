@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-12-18T16:23:35+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">AI for BI: Transform Customer Feedback into Actionable Insights with CrewAI and Streamlit</title><link href="http://localhost:4000/2024/12/18/custfb-to-streamlit.html" rel="alternate" type="text/html" title="AI for BI: Transform Customer Feedback into Actionable Insights with CrewAI and Streamlit" /><published>2024-12-18T00:00:00+01:00</published><updated>2024-12-18T00:00:00+01:00</updated><id>http://localhost:4000/2024/12/18/-custfb-to-streamlit</id><content type="html" xml:base="http://localhost:4000/2024/12/18/custfb-to-streamlit.html"><![CDATA[<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/chartblue.png?raw=true" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-12-23T10:31:36+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">AI for BI: Transform Customer Feedback into Actionable Insights with CrewAI and Streamlit</title><link href="http://localhost:4000/2024/12/18/custfb-to-streamlit.html" rel="alternate" type="text/html" title="AI for BI: Transform Customer Feedback into Actionable Insights with CrewAI and Streamlit" /><published>2024-12-18T00:00:00+01:00</published><updated>2024-12-18T00:00:00+01:00</updated><id>http://localhost:4000/2024/12/18/-custfb-to-streamlit</id><content type="html" xml:base="http://localhost:4000/2024/12/18/custfb-to-streamlit.html"><![CDATA[<p><img src="https://github.com/alanjones2/CrewAIapps/blob/main/images/AIBI/chartblue.png?raw=true" alt="" /></p>
 
 <p><em>Based on Image by <a href="https://pixabay.com/users/colibrie-15745216/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=9126721">Temel</a> from <a href="https://pixabay.com//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=9126721">Pixabay</a></em></p>
 
@@ -60,7 +60,7 @@ import os
 os.environ["OPENAI_API_KEY"] = "your api key"
 </code></pre></div></div>
 
-<p>OpenAI will charge you for using their LLM. However, running the code below should cost no more than a few cents (but keep an eye on your usage in the OpenAI dashboard). The CrewAI software that we use is open source and costs nothing.</p>
+<p>OpenAI will charge you for using their LLM. However, running the code below should cost no more than a few cents (but you <strong>MUST</strong> keep an eye on your usage in the OpenAI dashboard — things go wrong sometimes! It is also a good idea to set a monthly limit on your spending.)). The CrewAI software that we use is open source and costs nothing.</p>
 
 <p>Let’s get on with the coding.</p>
 
@@ -399,6 +399,8 @@ I will <span class="k">do </span>right next, and don<span class="s1">'t use a to
 <p>This seemed something to do with the complexity of the task because when I split the tasks the problem disappeared.</p>
 
 <p>However, I’m not entirely convinced that my complexity diagnosis was correct as I have been in touch with other developers who have found different solutions to what appears to be the same problem (lowering the temperature, for example - that didn’t work for me). At the time of writing, this is a live issue on the CrewAI GitHub repo.</p>
+
+<p><strong><em>Update: that bug was intermittent and has happened again with the code, above You should keep an eye on the output when running this code. It could loop infinitely and if not stopped you might end up with a large bill.</em></strong></p>
 
 <h3 id="final-thoughts-on-the-app">Final thoughts on the app</h3>
 
