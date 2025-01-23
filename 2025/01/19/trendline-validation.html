@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="/assets/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Data Visualization, Data Science and AI" /></head>
+<body class="container" style="background-color:ghostwhite;"><header><!--</header> class="site-header" role="banner" style="background-color: white">-->
+  <div class="wrapper mb-2"><a class="site-title" style="font-size: larger;" rel="author" href="https://datavizandai.github.io">Data Visualization, Data Science and AI</a>
+    <a class="site-nav" rel="author" href="/about">About</a>
+  </div>
+</header><main class="container" aria-label="Content">
+      <div >
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Are Your Trendlines Meaningful? A Guide for Data Visualization</h1>
+    <h3>How to ensure that your Plotly trendlines are valid</h3>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-01-19T00:00:00+01:00" itemprop="datePublished">Jan 19, 2025
+      </time></p>
+  </header>
+
+  <!-- Google Analytics-->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VDYY6RYRK1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+
+      gtag('config', 'G-VDYY6RYRK1');
+  </script>
+
+  <div class="row">
+    <div class="col-sm-9">
+      <div class="post-content e-content" itemprop="articleBody">
+        <p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/headerimage.png?raw=true" alt="" /></p>
+
+<p>You can draw a trendline on any scatter chart. But should you?</p>
+
+<p>We are going to look at plotting trendlines over scatter chart data and how we can validate them. We’ll also see that, even if they turn out to be not that great, they still might be useful.</p>
+
+<p>A trendline should show some relationship between the variables being plotted. If we plot ice cream sales against summer temperatures we would likely see some correlation between the two variables. And if we were to plot a regression line it might well discover a linear relationship - the hotter it gets the more ice cream is sold (though at the extremes you might find that relationship breaks down, e.g. if it gets too hot, people may not go out and so will stop buying).</p>
+
+<p>But how do we know if there really is a meaningful relationship? </p>
+
+<p>The validity of a trendline depends on how well it represents the underlying relationship in the data. Here are two extremes:</p>
+
+<ul>
+  <li>
+    <p>Plotting a trendline over random data is clearly not sensible - we can do it, but it won’t be meaningful.</p>
+  </li>
+  <li>
+    <p>Plotting a trendline over a set of points that have a strict linear relationship (where all the dots already form a straight line) will simply overlay a solid line on the dotted one  -  this may be valid but it won’t lead to any further insight or information.</p>
+  </li>
+</ul>
+
+<p>Here are a couple of examples - the first one is made with pseudo-random data.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/randomplot.png?raw=true" alt="" /></p>
+
+<p>And this second one represents data with a strict linear relationship.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/linearplot.png?raw=true" alt="" /></p>
+
+<p>These are extremes and you will find most plots will be somewhere in between. For example, the following plot is linear data with noise added (to make it more realistic) so there ought to be a genuine relationship to be discovered.</p>
+
+<p>You can easily see that the trendline demonstrates the underlying linearity of the relationship.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/linearwithnoiseplot.png?raw=true" alt="" /></p>
+
+<p>Here is the Python code that produced the chart above. We begin by generating random <em>x</em> values. The <em>y</em> values are calculated as 3 times <em>x</em> with some random noise added. We convert that into a Pandas dataframe and then plot it as a Plotly scatter chart.</p>
+
+<pre><code class="language-Python"># Generate random data
+x = np.random.rand(100) * 100  # Random x values between 0 and 100
+y = 3 * x + np.random.randn(100) * 30  # y = 3x with noise
+
+# Create a DataFrame
+data = pd.DataFrame({'x': x, 'y': y})
+
+# Plot scatter chart with trendline
+fig = px.scatter(data, x='x', y='y', title='Scatter Chart with Trendline',
+                 labels={'x': 'X-axis', 'y': 'Y-axis'},
+                 # Ordinary Least Squares regression for trendline
+                 trendline='ols', trendline_color_override='red')  
+
+# Show the plot
+fig.show()
+</code></pre>
+
+<p>Plotly allows us to add a trendline very easily. Here we specify the <a href="https://en.wikipedia.org/wiki/Ordinary_least_squares">Ordinary Least Squares</a> (OLS) algorithm for generating a linear regression line.</p>
+
+<p>OLS calculates a straight line through the data by minimizing the sum of squared residuals. A residual is the difference between the observed values and the predicted values, i.e the values of the points that will make up the trendline. OLS will find the line that minimizes the sum of the squared residuals.</p>
+
+<h3 id="but-how-do-i-know-if-it-is-valid">But how do I know if it is valid</h3>
+
+<p>Not all graphs are so easily interpreted, so how can we be more confident that the trendline is valid? Here are some ideas.</p>
+
+<h4 id="visual-checking">Visual checking</h4>
+
+<p>A trendline should exhibit a recognizable trend or pattern. (This might not be linear but we will limit ourselves to this type of relationship here). So, you can visually check that it looks right. If the plotted points are closely grouped around the regression line and there are not too many outliers then you probably have a valid chart.</p>
+
+<p>But there are statistical methods we can use, too.</p>
+
+<h4 id="correlation-and-p-values">Correlation and p-values</h4>
+
+<p>You can check if there is a meaningful correlation between the variables by finding the <a href="https://en.wikipedia.org/wiki/Coefficient_of_determination"><strong>coefficient of determination</strong></a> (R²). This measures how well the trendline fits the data. R² is a real number in a range of 0 to 1 and tells us how well a mathematical model (a line or curve) fits a set of data. R² values close to 1 indicate a strong fit, while values near 0 suggest the trendline does not explain much of the variability in the data.</p>
+
+<p>Looking at the <a href="https://en.wikipedia.org/wiki/P-value"><strong>p-value</strong></a> will helps us decide if the results of an experiment or study are meaningful or just happened by chance. The p-value in regression analysis is a statistical measure used to assess whether the relationship between the variables is statistically significant. The p-value represents the probability that the observed relationship occurred by chance if the null hypothesis (no relationship) is true.</p>
+
+<p>A low p-value (typically &lt; 0.05) suggests that the relationship is statistically significant, meaning the independent variable(s) likely have an effect on the dependent variable. A high p-value (≥ 0.05) suggests that the relationship might not be statistically significant.</p>
+
+<p>Plotly uses the <em>statsmodels</em> library to draw trendlines and provides functions to retrieve the regression results including R² and the p-value.</p>
+
+<p>Some of these results can be seen if you hover over the trendline in the Plotly chart, as you can see in the screenshot below.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/plotlystatresults.png?raw=true" alt="" /></p>
+
+<p>But we can also access the values programmatically. Append the following to the code above and you will see the resulting values.</p>
+
+<pre><code class="language-Python"># Extract trendline results
+results = px.get_trendline_results(fig)
+ols_model = results.iloc[0]["px_fit_results"]  # OLS regression model
+
+# Print p-value and R²
+print("P-Value:", ols_model.pvalues[1])  # p-value for the slope
+print("R²:", ols_model.rsquared)
+</code></pre>
+
+<p>The result can be seen below: you can see that the R² is close to one and the p-value is very low telling us that there is a meaningful correlation between the variables and that the result is statistically significant.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   P-Value: 1.5509131226498723e-51
+   R²: 0.9034004881292087
+</code></pre></div></div>
+
+<p>If we were to do the same thing with the other graphs we’d get these results:</p>
+
+<p><strong>Random data graph</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P-Value: 0.4897676270987973
+R²: 0.00488066061729886
+</code></pre></div></div>
+
+<p><strong>Linear data graph</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P-Value: 1.4099324978279833e-124
+R²: 1.0
+</code></pre></div></div>
+
+<p>With the linear data the p-value is very low and R² is as high as it can be, 1. Whereas with the random data the p-value is much higher than 0.05 telling us that the result could be random (and of course it is) while R² is very low meaning that the trendline doesn’t fit the data well.</p>
+
+<h3 id="not-valid-but-useful-anyway">Not valid but useful, anyway</h3>
+
+<p>So that’s the formal way of looking at trendlines and their validity. But even when a trendline is not exactly valid, it can still be useful.</p>
+
+<p>I recently plotted some historical weather data for London to see if I could detect the effect of global warming on summer temperatures.</p>
+
+<p>I made a scatter graph like the one below. Can you see a trend?</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/weatherscatter.png?raw=true" alt="" /></p>
+
+<p>It’s not striking but there does seem to be an upwards trend. I added a trendline thus:</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/weathertrend.png?raw=true" alt="" /></p>
+
+<p>Aha! There we see a definite trend upwards. Proof that London temperatures are rising. But many of the data points are not very close to the line.</p>
+
+<p>So, what if I were to try and validate the trendline? Unfortunately, although the p-value is quite low, R² is about 3.9 - nowhere near 1, so it doesn’t pass that validity test.</p>
+
+<p>Does that mean my trendline is useless?</p>
+
+<p>In the figure below I’ve added a line to the scatter chart and that makes the picture a little clearer.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/trendline-validation/images/weatherlineandtrend.png?raw=true" alt="" /></p>
+
+<p>There certainly is an overall rise in temperature but perhaps there is not a simple linear relationship between time and temperature. The temperatures wobble up and down around the trendline.</p>
+
+<p>But the trendline is not useless.</p>
+
+<p>Perhaps there are cyclical weather patterns that sometimes raise the overall temperature and at other times lower it. Also, weather, at least at a local level, is notoriously chaotic. The point is that while there is not a simple pattern to be discovered here, at least not without more data, there is an overall trend that the OLS line has highlighted.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>Using the measures we discussed above can give you confidence in the validity of your data. But, as we see above, a low R² doesn’t necessarily mean that the trendline shouldn’t be drawn.</p>
+
+<p>There is one other thing you might want to consider as well: Do you have enough data? The weather data that I plotted is for the 20th and 21st centuries. What if I had been able to retrieve data from the beginning of the Industrial Revolution when carbon emissions began to increase? Or perhaps, beyond that. Maybe a different trend would emerge.</p>
+
+<hr />
+
+<p>Thanks for reading and I hope that this has been useful. I you would like to see more articles like this then click on the link at the top of this page. You might also subscribe to my email <a href="technofile.substack.com">list</a> to know when new articles are published.</p>
+
+<p>Code for this article is <a href="https://github.com/DataVizandAI/public_code/tree/main/trendline-validation">here</a></p>
+
+      </div>
+
+    </div>
+    <div class="col-sm-3">
+      Sponsored content<!--ads etc here -->
+<!-- streamlit from scratch-->
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light"
+    style="background-image: url('https://github.com/alanjones2/streamlitfromscratch/blob/main/sfsimage.png?raw=true');background-size: cover;">
+    <div>
+        <i>eBook</i>
+        <img class="mr-3" src="" width='80%' height='auto' alt="">
+        <h2>
+            <a href="https://alanjones2.github.io/streamlitfromscratch/" target="_blank">
+                <span style="color:navy">Streamlit from Scratch</span>
+            </a>
+        </h2>
+        <p class="lead" style="color: navy;"><b>Streamlit</b> is a framework for creating Data Science apps in Python.
+            <br />
+            <b>Streamlit from Scratch</b> will take from building a simple we page through to creating fully functional
+            interactive data dashboards.
+        </p>
+
+    </div>
+</div>
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+
+    <i>eBook</i>
+    <h2><a href='https://alanjones.gumroad.com/l/auiws' target='_blank'><span style="color:navy">Plotting with
+                Pandas</span></a>
+    </h2>
+    <p class="lead" style="color: navy;">
+        <b>Plotting with Pandas: an Introduction to Data Visualization</b> is an ebook that covers basic and
+        statistical plots using Python and Pandas, line and bar charts, scatter plots, pie charts,
+        histograms, box plots, etc.
+    </p>
+</div>
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end--></div>
+<div>
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+        kofiWidgetOverlay.draw('alan_jones', {
+            'type': 'floating-chat',
+            'floating-chat.donateButton.text': 'Support me',
+            'floating-chat.donateButton.background-color': '#5bc0de',
+            'floating-chat.donateButton.text-color': '#323842'
+        });
+    </script>
+</div></div><a class="u-url" href="/2025/01/19/trendline-validation.html" hidden></a>
+</article>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+  </body>
+
+</html>
