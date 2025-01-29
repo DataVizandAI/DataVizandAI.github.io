@@ -26,7 +26,7 @@ Public code should be copied across to the '**pubic_code**' repo in a folder of 
 
 Synch all repos with GitHub desktop.
 
-View repo on Github from a browser signed in as jones.raymond.alan@gmail.com
+View repo on Github from a browser signed in as rayandcelina
 
 
 
