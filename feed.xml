@@ -1,4 +1,235 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-01-29T10:52:20+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">Rapid Data Visualization with Copilot and Plotly</title><link href="http://localhost:4000/2025/01/29/plotly_weather2.html" rel="alternate" type="text/html" title="Rapid Data Visualization with Copilot and Plotly" /><published>2025-01-29T00:00:00+01:00</published><updated>2025-01-29T00:00:00+01:00</updated><id>http://localhost:4000/2025/01/29/plotly_weather2</id><content type="html" xml:base="http://localhost:4000/2025/01/29/plotly_weather2.html"><![CDATA[<p><img src="https://github.com/DataVizandAI/public_code/blob/main/dataviz-copilot/images/Untitled.png?raw=true" alt="" /></p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2025-02-08T16:44:13+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Data Visualization, Data Science and AI</title><subtitle>Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</subtitle><entry><title type="html">Instant RAG Applications with Pinecone Assistant</title><link href="http://localhost:4000/2025/02/08/instant-RAG-with-Pinecone.html" rel="alternate" type="text/html" title="Instant RAG Applications with Pinecone Assistant" /><published>2025-02-08T00:00:00+01:00</published><updated>2025-02-08T00:00:00+01:00</updated><id>http://localhost:4000/2025/02/08/instant-RAG-with-Pinecone</id><content type="html" xml:base="http://localhost:4000/2025/02/08/instant-RAG-with-Pinecone.html"><![CDATA[<p><img src="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/george-robot.png?raw=true" alt="" />
+<em>George Robotington - image made with DALL-E</em></p>
+
+<p>How easy is it to create a Retrieval Augmented Generation (RAG) application? By using the recently released Pinecone Assistant you can start interrogating your documents in minutes.</p>
+
+<p>And with a bit more effort you can have a fully functional Streamlit app.</p>
+
+<p>We are going to use a Streamlit chat UI to develop an app that answers queries or generates documents about the US Constitution. It will mimic online course notes that a student would have access to and consists of the Constitution, itself, and a Wikipedia article about it.</p>
+
+<h3 id="rag-and-vector-databases-a-very-quick-overview">RAG and Vector Databases: a very quick overview</h3>
+
+<p>Retrieval-Augmented Generation (RAG) is a powerful technique that enhances Large Language Models (LLMs) by grounding their knowledge in external sources. Instead of relying solely on their training data, RAG models can access and process information from a corpus of documents, enabling them to provide more accurate and relevant responses.</p>
+
+<p>Vector databases play a fundamental role in RAG by efficiently storing and retrieving information from your documents. They can identify the most relevant information required to answer a query, allowing a RAG app to access precisely the data it needs.</p>
+
+<p>Pinecone is well-known as a provider of vector databases that have been used in RAG applications for some time. Their products include a vector database service that is aimed at RAG developers. However, recently they have released <strong>Pinecone Assistant</strong>, an out-of-the-box RAG solution which makes it easy to create apps by simply uploading documents and querying with plain English prompts.</p>
+
+<p>Even better, they provide a free tier that can be used for small apps or experimentation.</p>
+
+<p>To give you an idea of how Pinecone Assistant simplifies RAG solutions, below is a diagram from their <a href="https://docs.pinecone.io/reference/architecture/assistant-architecture">documentation</a> (reproduced with permission).</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/assistant-architecture_light.png?raw=true" alt="Diagram" />
+<em>Image courtesy of Pinecone</em></p>
+
+<p>The Assistant does three things:</p>
+
+<p><strong>Data ingestion</strong>
+A RAG system needs to be provided with documents to work with. The ingestion process splits a document into smaller parts and generates vector embeddings for each part. The embeddings are stored in the vector database and indexed.</p>
+
+<p><strong>Data retrieval</strong>
+When the assistant receives a query, it is processed and relevant chunks from the uploaded content are retrieved from the database.</p>
+
+<p><strong>Response generation</strong>
+The assistant ranks the chunks for relevance and this, the chat history and assistant instructions are then used by a large language model (LLM) to generate appropriate responses.</p>
+
+<p>Basically, all you need to do to create an app is to upload documents and provide a user interface - Pinecone Assistant takes care of the rest.</p>
+
+<h3 id="getting-started---the-assistant-console">Getting started - the assistant console</h3>
+
+<p>The are two ways of interacting with an agent: through the API or via the Assistant Console. We will look at both.</p>
+
+<p>First, thought you need to get on board with Pinecone. Go to the the <a href="https://www.pinecone.io/pricing/">pricing page</a> and sign up for the free <em>Starter</em> plan. You can then get an API key, and, of course, to use the API, you will need to install the Python library. When you get you API key, you are given one chance to copy it and keep it somewhere safe - <em>don’t lose it!</em></p>
+
+<p>The quick <a href="https://docs.pinecone.io/guides/get-started/assistant-quickstart">start documentation</a> is a good guide to get you started with the Python library but we are going to start with the console and move on to the API when we look at the Streamlit app.</p>
+
+<p>The Assistant console lets us create an assistant, upload documents and write queries in a web interface. Below is a screenshot of my console with a single assistant called <em>demo1</em>.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/console.png?raw=true" alt="Console screenshot" /></p>
+
+<p>Selecting that <em>demo1</em> will take you to the assistant where you can upload documents and query them. Below is a screenshot of <em>demo1</em>. You can see that I have uploaded two PDF documents one is the US Constitution document from the US Senate and the other is a PDF version of the Wikipedia entry for the US Constitution. (You can find lots of versions of the constitution document on the web - some are more attractive than others but they all contain the same information, of course).</p>
+
+<p>In this screenshot you will also see that I have made a query “<em>List the articles</em>” and that <em>demo1</em> has responded accordingly. It is good to see that the assistant gives references in its response. If you hover over the ‘[1]’ in the response it will tell you which document it found the information in and where.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/assistant-screenshot-with-query.png?raw=true" alt="assistant with query screenshot" /></p>
+
+<p>Not all of the functions of the API are available in the console. One of those that we will explore shortly is the ability to specify a JSON format for the response.</p>
+
+<h3 id="the-api-and-a-streamlit-app">The API and a Streamlit app</h3>
+
+<p>In the app, I build on the <em>demo1</em> agent and the documents that I have uploaded. You can find the code and the PDFs in the <a href="https://github.com/DataVizandAI/public_code/tree/main/instant-RAG">GitHub repo for this project</a>.</p>
+
+<p>The Streamlit code is quite short: three functions and a bit of <em>main</em> code. I’ll go through how it works first and then we’l see how it can be used.</p>
+
+<p>Streamlit interface components create a nice UI: here is a screenshot of the app in action.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/app-screenshot.png?raw=true" alt="" /></p>
+
+<p>The main panel contains the chat interface and you can see that I have submitted a query and the assistant has answered.</p>
+
+<p>On the left is a sidebar that contains two UI elements: a pair of radio buttons that allow you to select the format of the response and an expander panel that contains the full response from the agent. There is more to the full response that you can see in the screenshot; the <em>content</em> of the response is what is displayed in the main panel but there are other fields that may be populated by the assistant that are not relevant here but can be seen in the full response panel.</p>
+
+<p>I’ll go through the code showing how the Pinecone API is used but first, we need to import the libraries.</p>
+
+<pre><code class="language-Python">import streamlit as st
+from pinecone import Pinecone
+from pinecone_plugins.assistant.models.chat import Message
+</code></pre>
+
+<p>The first two are obvious and the second is, as we shall see, necessary in order to construct a prompt for the assistant.</p>
+
+<p>The remainder of the code consists of three functions <code class="language-plaintext highlighter-rouge">initialize_pinecone</code>, <code class="language-plaintext highlighter-rouge">retrieve_answer</code>, and <code class="language-plaintext highlighter-rouge">main</code>.</p>
+
+<p>The first is called once to get the assistant and requires the API key which should be stored in a Streamlit secret in the file <em>.streamlit/secrets.toml</em> (see <a href="https://docs.streamlit.io/develop/api-reference/connections/st.secrets"><em>here</em></a> if you are unfamiliar with Streamlit secrets).</p>
+
+<p>The function <code class="language-plaintext highlighter-rouge">retrieve_answer</code> queries the assistant and <code class="language-plaintext highlighter-rouge">main</code> contains the UI.</p>
+
+<p>Before looking at these in more detail we should see the <em>main</em> code which is run first.</p>
+
+<pre><code class="language-Python">if __name__ == "__main__":
+
+    pa = initialize_pinecone()
+
+    st.sidebar.markdown("# :blue[Options]")
+
+    json_mode = st.sidebar.radio("Select Answer Format", 
+                                 ("Normal text", "JSON"),
+                                 horizontal=True) == "JSON"
+
+    full_response = st.sidebar.expander("Full response",
+                                        expanded=False)
+
+    main(pa)
+</code></pre>
+
+<p>We first initialise the assistant, then create a sidebar that contains the radio buttons and the expandable panel for the full response. Note that the variables that are set by these UI elements, <code class="language-plaintext highlighter-rouge">json_mode</code> and <code class="language-plaintext highlighter-rouge">full_response</code>, are globally available.</p>
+
+<p>Lastly, we call the <code class="language-plaintext highlighter-rouge">main</code> function and pass the assistant to it.</p>
+
+<p>Here’s the code that initialises the assistant:</p>
+
+<pre><code class="language-Python">def initialize_pinecone():
+        api_key = st.secrets["PINECONE_API_KEY"]
+        pc = Pinecone(api_key=api_key)
+        assistant = pc.assistant.Assistant(
+            assistant_name="demo1", 
+        )
+        return assistant
+</code></pre>
+
+<p>It reads the key from a secret, creates a Pinecone instance, retrieves the assistant <em>demo1</em> and returns it.</p>
+
+<p>Next, we’ll look at the <code class="language-plaintext highlighter-rouge">main</code> function.</p>
+
+<pre><code class="language-Python">def main(assistant):
+    st.markdown("# :blue[Pinecone Assistant]: US Constitution")
+
+    # User query input
+    user_query = st.text_input("Enter your query:")
+    if st.button("Submit"):
+        if user_query:
+            answer = retrieve_answer(assistant, user_query, json_mode)
+            if json_mode:
+                st.json(answer.content)
+            else:
+                st.write(answer.content)
+            full_response.write(answer)
+        else:
+            st.warning("Please enter a query.")
+</code></pre>
+
+<p>This prompts the user for a query and when the <em>Submit</em> button is pressed it retrieves an answer from the assistant, passing the assistant instance, the actual query and the output mode.</p>
+
+<p>Having retrieved the response it writes the content either as JSON or plain text. The full response is written to the panel in the sidebar.</p>
+
+<p>That leaves the function <code class="language-plaintext highlighter-rouge">retrieve_answer</code> which makes the actual query.</p>
+
+<pre><code class="language-Python">def retrieve_answer(assistant, query, json_mode):
+    msg = Message(role="user", content=query)
+
+    resp = assistant.chat(messages=[msg],
+                          json_response=json_mode)
+    return resp.message
+</code></pre>
+
+<p>This is quite straightforward. First, we create a Pinecone <code class="language-plaintext highlighter-rouge">Message</code> with the query, we then call the <code class="language-plaintext highlighter-rouge">chat</code> methods from the <code class="language-plaintext highlighter-rouge">assistant</code> and this returns a response. The part of the response we want is called <code class="language-plaintext highlighter-rouge">message</code> and this is what is returned for display by the <code class="language-plaintext highlighter-rouge">main</code> function.</p>
+
+<p>So, that is how it works; now, how I used it.</p>
+
+<h3 id="usage">Usage</h3>
+
+<p>I’m imagining a hypothetical high school class that is studying the US Constitution. This app can be used by students to easily find answers to questions about the subject as we have already seen. For example, you could ask for a list of the articles, or amendments, in the document and then drill down to a particular item by asking more about that.</p>
+
+<p>But it can do much more.</p>
+
+<p>I asked the assistant to “<em>Write a brief study guide</em>” and it responded with a comprehensive overview that included the structure of the constitution, key concepts, historical context and so on. This sort of thing could be an invaluable guide that could be created by the teacher and circulated to students. Here is a snippet of what I generated:</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/study-guide-screenshot.png?raw=true" alt="" /></p>
+
+<p>Another neat use was to ask “<em>Write a list of 5 multiple choice questions</em>” and set the output mode to JSON. Here is part of the response:</p>
+
+<pre><code class="language-JSON">{
+    "questions":[
+        {
+        "question":
+            "What does the Thirteenth Amendment of the U.S. Constitution address?",
+        "choices":[
+            "Abolition of slavery",
+            "Women's suffrage",
+            "Prohibition of alcohol",
+            "Income tax"
+            ],
+        "answer":"Abolition of slavery"
+        },
+        {
+        "question":
+            "Which amendment granted women the right to vote?",
+        "choices":[
+            "Fifteenth Amendment",
+            "Nineteenth Amendment",
+            "Twenty-First Amendment",
+            "Twenty-Sixth Amendment"
+            ],
+        "answer":"Nineteenth Amendment"
+        },
+</code></pre>
+
+<p>This output could be easily processed into an online test for the students and the Streamlit <code class="language-plaintext highlighter-rouge">st.json</code> function that is used to display the response incorporates a widget for easily copying the JSON code.</p>
+
+<p>These examples will also be in the <a href="https://github.com/DataVizandAI/public_code/tree/main/instant-RAG">GitHub repo</a>.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>Pinecone Assistant makes writing RAG apps a breeze. The free tier allows you up to three assistants and each assistant has its own documents. So you could have different assistants for different purposes each with their own set of documents. (The paid plan gives you an unlimited number of assistants).</p>
+
+<p>A good thing is that you don’t need your own subscription to an LLM service. You can choose between OpenAI and Anthropic models and the associated costs are included in your Pinecone plan (even the free one).</p>
+
+<p>There are limitations on the resources that you can use in the free plan, see the <a href="https://docs.pinecone.io/guides/assistant/understanding-assistant#pricing">docs</a> for details.</p>
+
+<p>You will also notice from the console image, above, that, while I have used next to no storage, I’m nearly up to my limit of input tokens. Input tokens are generated in response to a query and are presumably partly a function of the data that is retrieved from the database. That query saw the input tokens rise from 1.3 M to 1.4 M. That’s quite a lot for a simple query but it’s probably because just about the whole of each document needs to be used to answer it.</p>
+
+<p>When I asked “<em>What is the fifth amendment?</em>” there was no noticeable change in the number of input tokens used and I imagine this must be because only a small part of one document was needed to answer the question.</p>
+
+<p>My usage may not be typical, I’ve uploaded very little but made quite a lot of queries most of which required fairly short answers. A real application may have quite a different usage profile.</p>
+
+<p>So, whether the quota in the free tier is enough to support serious work is an open question. If you are using Pinecone commercially then the Standard plan might be an option - it is probably not going to break the finances of your company. If you want to use it for personal use and don’t want to pay, you will need to keep an eye on your usage.</p>
+
+<p>Personally, I am definitely thinking about how I can use Pinecone Assistant… i just need a project.</p>
+
+<hr />
+
+<p>Thanks for reading and, if you haven’t tried Pinecone Assistant yet, maybe this will encourage you to give it a try.</p>
+
+<p>To read more of my articles and tutorials please see my <a href="https://datavizandai.github.io/">website</a> and consider subscribing to my occasional <a href="technofile.substack.com">newsletter</a> where I link to new articles. You can also follow me on Medium.</p>
+
+<p><strong>Notes</strong></p>
+
+<ul>
+  <li>The code and data for this project can be found <a href="https://github.com/DataVizandAI/public_code/tree/main/instant-RAG">here</a></li>
+  <li>The US Constitution is a public domain document and the Wikipedia article has a Creative Commons license.</li>
+  <li>All images and screenshots are by the author unless otherwise noted.</li>
+  <li><em>Disclaimer: I have no commercial interest in Pinecone</em></li>
+</ul>]]></content><author><name></name></author><summary type="html"><![CDATA[Pinecone Assistant is an online RAG/Vector database solution with a free tier]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/george-robot.png?raw=true" /><media:content medium="image" url="https://github.com/DataVizandAI/public_code/blob/main/instant-RAG/images/george-robot.png?raw=true" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Rapid Data Visualization with Copilot and Plotly</title><link href="http://localhost:4000/2025/01/29/plotly_weather2.html" rel="alternate" type="text/html" title="Rapid Data Visualization with Copilot and Plotly" /><published>2025-01-29T00:00:00+01:00</published><updated>2025-01-29T00:00:00+01:00</updated><id>http://localhost:4000/2025/01/29/plotly_weather2</id><content type="html" xml:base="http://localhost:4000/2025/01/29/plotly_weather2.html"><![CDATA[<p><img src="https://github.com/DataVizandAI/public_code/blob/main/dataviz-copilot/images/Untitled.png?raw=true" alt="" /></p>
 
 <p>GitHub has recently introduced a free tier for Copilot, so there now is absolutely no reason not to try it out. I decided to give it a go on some day-to-day coding to see how much more productive it is than coding by hand.</p>
 
@@ -3639,4 +3870,4 @@ _Made with Taipy_
 
 <p><em>All images and screenshots are by me, the author unless otherwise noted.</em></p>
 
-<p><em>All code is covered by the MIT license (see the repo) and, while not necessary, attribution is always appreciated.</em></p>]]></content><author><name></name></author><summary type="html"><![CDATA[We explore the Code Completion tool from OpenAI’s Assistants API to create visualizations directly from data]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://cdn-images-1.medium.com/max/1200/1*BhucSzDp94gE2iZLAgrW4g.png" /><media:content medium="image" url="https://cdn-images-1.medium.com/max/1200/1*BhucSzDp94gE2iZLAgrW4g.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">How to Build a ReAct AI Agent with Claude 3.5 and Python</title><link href="http://localhost:4000/2024/08/01/How-to-build-a-ReAct-agent-with-claude.html" rel="alternate" type="text/html" title="How to Build a ReAct AI Agent with Claude 3.5 and Python" /><published>2024-08-01T00:00:00+02:00</published><updated>2024-08-01T00:00:00+02:00</updated><id>http://localhost:4000/2024/08/01/How-to-build-a-ReAct-agent-with-claude</id><content type="html" xml:base="http://localhost:4000/2024/08/01/How-to-build-a-ReAct-agent-with-claude.html"><![CDATA[]]></content><author><name></name></author><summary type="html"><![CDATA[We present a Reason+Act agent that iteratively reasons and gathers information from external tools before providing an answer.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://miro.medium.com/v2/resize:fit:1100/format:webp/1*0cpvsatUj9HPm6H3IJNmTw.png" /><media:content medium="image" url="https://miro.medium.com/v2/resize:fit:1100/format:webp/1*0cpvsatUj9HPm6H3IJNmTw.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<p><em>All code is covered by the MIT license (see the repo) and, while not necessary, attribution is always appreciated.</em></p>]]></content><author><name></name></author><summary type="html"><![CDATA[We explore the Code Completion tool from OpenAI’s Assistants API to create visualizations directly from data]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://cdn-images-1.medium.com/max/1200/1*BhucSzDp94gE2iZLAgrW4g.png" /><media:content medium="image" url="https://cdn-images-1.medium.com/max/1200/1*BhucSzDp94gE2iZLAgrW4g.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
