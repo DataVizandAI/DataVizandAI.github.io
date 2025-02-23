@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="/assets/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Data Visualization, Data Science and AI" /></head>
+<body class="container" style="background-color:ghostwhite;"><header><!--</header> class="site-header" role="banner" style="background-color: white">-->
+  <div class="wrapper mb-2"><a class="site-title" style="font-size: larger;" rel="author" href="https://datavizandai.github.io">Data Visualization, Data Science and AI</a>
+    <a class="site-nav" rel="author" href="/about">About</a>
+  </div>
+</header><main class="container" aria-label="Content">
+      <div >
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Create Your Own House Style for Matplotlib Plots and Charts</h1>
+    <h3>Customise your Matplotlib plots with off-the-shelf style sheets - or design your own</h3>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-02-23T00:00:00+01:00" itemprop="datePublished">Feb 23, 2025
+      </time></p>
+  </header>
+
+  <!-- Google Analytics-->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VDYY6RYRK1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+
+      gtag('config', 'G-VDYY6RYRK1');
+  </script>
+
+  <div class="row">
+    <div class="col-sm-9">
+      <div class="post-content e-content" itemprop="articleBody">
+        <p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/poster.png?raw=true" alt="" /></p>
+
+<p>Websites, publications and news sources all have their own styles. Take a look at the financial data published by, say, the BBC or The New York Times. Or polling data on Nate Silver’s FiveThirtyEight website. They each have a clear and consistent look.</p>
+
+<p>We are going to look at how we can achieve something similar with our Pandas charts and plots. First, by using the built-in styles that are available to us and then by looking at how we can create our own customizations.</p>
+
+<p>The default style renders a line graph like the image, below. It’s a clean-looking image but there are several more built-in styles if you prefer something different.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/default.png?raw=true" alt="" /></p>
+
+<p>The  availablestyles are stored in a list in the <em>Matplotlib</em> library. First, we need to import the library and, we’ll import <em>numpy</em> at the same time as we will use this shortly.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+</code></pre></div></div>
+
+<p>The styles are in <code class="language-plaintext highlighter-rouge">plt.style.available</code> - the code below prints a neat list of the styles.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">styles</span> <span class="o">=</span> <span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="n">available</span>
+<span class="k">for</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">styles</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
+</code></pre></div></div>
+<p>Here is the list.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    Solarize_Light2
+    _classic_test_patch
+    _mpl-gallery
+    _mpl-gallery-nogrid
+    bmh
+    classic
+    dark_background
+    fast
+    fivethirtyeight
+    ggplot
+    grayscale
+    petroff10
+    seaborn-v0_8
+    seaborn-v0_8-bright
+    seaborn-v0_8-colorblind
+    seaborn-v0_8-dark
+    seaborn-v0_8-dark-palette
+    seaborn-v0_8-darkgrid
+    seaborn-v0_8-deep
+    seaborn-v0_8-muted
+    seaborn-v0_8-notebook
+    seaborn-v0_8-paper
+    seaborn-v0_8-pastel
+    seaborn-v0_8-poster
+    seaborn-v0_8-talk
+    seaborn-v0_8-ticks
+    seaborn-v0_8-white
+    seaborn-v0_8-whitegrid
+    tableau-colorblind10
+</code></pre></div></div>
+
+<p>The list from my installation which is version 3.10.0 of Matplotlib. If you have a different version you may have a different list.</p>
+
+<p>Many of the styles have been created for the plotting package Seaborn but you can use any style with any plotting library that is based on Matplotlib.</p>
+
+<p>Other styles are emulations of other plotting systems or websites. The <code class="language-plaintext highlighter-rouge">ggplot</code> style is based on the <em>ggplot2</em> library that is commonly used in the R language.</p>
+
+<p>Below is a function that can be used to explore the different styles. It generates some pseudo-random data and then plots a line graph in Matplotlib. We can pass a style as a parameter to it.</p>
+
+<p>In the code, two Numpy sequences are created for the two axes <code class="language-plaintext highlighter-rouge">x</code> and <code class="language-plaintext highlighter-rouge">y</code>. <code class="language-plaintext highlighter-rouge">x</code> is created using <code class="language-plaintext highlighter-rouge">np.linspace(0, 10, 100)</code>, which generates 100 evenly spaced values between 0 and 10.</p>
+
+<p><code class="language-plaintext highlighter-rouge">y</code> is created by taking the sine of <code class="language-plaintext highlighter-rouge">x</code> values and adding some random noise to it using <code class="language-plaintext highlighter-rouge">np.random.normal(0, 0.1, 100)</code>, which generates 100 random values from a normal distribution with a mean of 0 and a standard deviation of 0.1.</p>
+
+<p>The code below displays a plot with the <code class="language-plaintext highlighter-rouge">seaborn-v0_8</code> style.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">plot_with_style</span><span class="p">(</span><span class="n">style</span><span class="p">):</span>
+    <span class="c1"># Create random data
+</span>    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+    <span class="c1"># Set the style
+</span>    <span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="n">style</span><span class="p">)</span>
+
+    <span class="c1"># Plot the data
+</span>    <span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">X-axis</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Y-axis</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Random Data Line Graph - </span><span class="si">{</span><span class="n">style</span><span class="si">}</span><span class="s"> style</span><span class="sh">'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+
+<span class="c1"># Example usage
+</span><span class="nf">plot_with_style</span><span class="p">(</span><span class="sh">'</span><span class="s">seaborn-v0_8</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/styles_9_0.png?raw=true" alt="png" /></p>
+
+<p>This is what the <code class="language-plaintext highlighter-rouge">ggplot</code> style looks like.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">plot_with_style</span><span class="p">(</span><span class="sh">'</span><span class="s">ggplot</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/styles_11_0.png?raw=true" alt="png" /></p>
+
+<p>How about a spooky dark background?</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">plot_with_style</span><span class="p">(</span><span class="sh">'</span><span class="s">dark_background</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/styles_13_0.png?raw=true" alt="png" /></p>
+
+<p>So that’s how we change to one of the built-in styles and one of these might be suitable for your purposes. Or maybe you want to be a little more adventurous.</p>
+
+<h3 id="changing-individual-attributes">Changing individual attributes</h3>
+
+<p>The attributes for Matplotlib graphs are stored in a dictionary called <em>rcParams</em>. You can change individual attributes by setting values in that dictionary. So, if you wanted to change the font size from its default value of 10 to something smaller, you could do this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">font.size</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
+</code></pre></div></div>
+
+<p>Any subsequent plot that you make will now have a font size of 8.
+You can easily find all of the rcParams simply by printing them.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="n">plt</span><span class="p">.</span><span class="n">rcParams</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>There are an awful lot of parameters so I won’t list them here. The purpose of some parameters is a little obscure and you would need to study the Matplotlib documentation to understand theier use. Others are fairly clear and below is some code that uses a few of these.</p>
+
+<p>The resulting plot is a little garish. The aim is not to be aesthetically pleasing but to make it plain how the parameters map onto the various parts of the plot.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">matplotlib</span> <span class="k">as</span> <span class="n">mpl</span>
+<span class="kn">from</span> <span class="n">cycler</span> <span class="kn">import</span> <span class="n">cycler</span>
+
+<span class="c1"># Reset everything to the default style
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">default</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Set custom rcParams for the plot
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">lines.linewidth</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>         <span class="c1"># Set line width to 4
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">lines.linestyle</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">--</span><span class="sh">'</span>      <span class="c1"># Set line style to dashed
+</span> <span class="c1"># Set color cycle for lines, the first is red and that is what will be used
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">axes.prop_cycle</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="nf">cycler</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="sh">'</span><span class="s">r</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">g</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">b</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">y</span><span class="sh">'</span><span class="p">])</span> 
+<span class="n">mpl</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">figure.facecolor</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">yellow</span><span class="sh">'</span> <span class="c1"># Set figure background color to yellow
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">axes.facecolor</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">lightblue</span><span class="sh">'</span><span class="c1"># Set axes background color to light blue
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">font.size</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span>              <span class="c1"># Set font size to 14
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">rcParams</span><span class="p">[</span><span class="sh">'</span><span class="s">text.color</span><span class="sh">'</span><span class="p">]</span> <span class="o">=</span> <span class="sh">'</span><span class="s">red</span><span class="sh">'</span>          <span class="c1"># Set text color to red
+</span>
+<span class="c1"># Generate random data
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Plot the data with custom style
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">X-axis</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Y-axis</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Random Data Line Graph - custom style</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/styles_21_0.png?raw=true" alt="png" /></p>
+
+<p>You can see what changing each of the parameters has done in the resulting chart - the meaning of these parameters is fairly clear but the comments tell you exactly what they are doing. The colour cycle is slightly more complicated - you don’t just set a single colour but a sequence of them that will be cycled through. In this case, of course, there is only one plot so only one colour is used. (I am not, by the way suggesting that you adopt this particular colour scheme!)</p>
+
+<h3 id="create-your-own-stylesheet">Create your own stylesheet</h3>
+
+<p>You don’t have to specify the parameters you want in every program you write. You can create your own stylesheet and use that instead of one of the built-in ones.
+All you have to do is create a text file with the rcParams set the way you want them and then use that as your stylesheet in a similar way to the built-in ones, for example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mpl.style.use('path-to-my-style-sheet')
+</code></pre></div></div>
+
+<p>And you don’t have to specify all of the rcParams only the ones that you want to change.</p>
+
+<p>Here is an example of a simple style sheet that I have saved in the file <em>example.mlpstyle</em>. It sets the colours to various shades of blue.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lines.linewidth: 2          # Set line width to 2
+figure.facecolor: eff3ff    # Set figure background color
+axes.facecolor: bdd7e7      # Set axes background color
+font.size: 14               # Set font size to 14
+text.color: 08519c          # Set text color
+axes.labelcolor: 08519c     # set the axes labels
+</code></pre></div></div>
+
+<p>The code below uses this style but it first sets the <em>default</em> style. This has the effect that the new style sheet changes the values specified in that sheet but leaves all the others as they are.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Reset everything to the default style
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">default</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Now apply the new stylesheet
+</span><span class="n">mpl</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="sh">'</span><span class="s">example.mplstyle</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Generate random data
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Plot the data with custom style
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">X-axis</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Y-axis</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Random Data Line Graph - custom style</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/styles_24_0.png?raw=true" alt="png" /></p>
+
+<p>As you can see, Matplotlib <code class="language-plaintext highlighter-rouge">rcParams</code> lets you create your own unique, and reusable, style for your Pandas plots.</p>
+
+<p>The examples here are, of course, deliberately simple, but you can explore how the parameters are used in the built-in styles by looking at their source code.</p>
+
+<h3 id="stylelib">Stylelib</h3>
+
+<p>You can find the code for all the different styles in the Matplotlib Github repository in the <a href="https://github.com/matplotlib/matplotlib/tree/main/lib/matplotlib/mpl-data/stylelib">Stylelib</a> folder. Try looking at the <em><a href="https://github.com/matplotlib/matplotlib/blob/main/lib/matplotlib/mpl-data/stylelib/classic.mplstyle">Classic</a></em> style — this demonstrates setting pretty much all the possible parameters. Or, for a much simpler stylesheet, look at <em><a href="https://github.com/matplotlib/matplotlib/blob/main/lib/matplotlib/mpl-data/stylelib/grayscale.mplstyle">greyscale</a></em> where, as you might imagine, the colours are set to black, white and varying shades of grey.</p>
+
+<h3 id="third-party-styles">Third-party styles</h3>
+<p>You can also find third-party libraries on GitHub (and elsewhere, no doubt), for example in the <a href="https://github.com/nschloe/matplotx">matplotx package</a>. Below is an example of the ‘Dracula’ style for that package.</p>
+
+<p>You will need to install the matplotx package and use the following code in front of your plots.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import matplotx
+plt.style.use(matplotx.styles.dracula)
+</code></pre></div></div>
+
+<p>Here is the code that uses it.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">matplotx</span>
+<span class="n">plt</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">use</span><span class="p">(</span><span class="n">matplotx</span><span class="p">.</span><span class="n">styles</span><span class="p">.</span><span class="n">dracula</span><span class="p">)</span>
+
+<span class="c1"># Generate random data
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Plot the data with custom style
+#with plt.style.context(matplotx.styles.dracula):
+</span><span class="n">plt</span><span class="p">.</span><span class="nf">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">xlabel</span><span class="p">(</span><span class="sh">'</span><span class="s">X-axis</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">ylabel</span><span class="p">(</span><span class="sh">'</span><span class="s">Y-axis</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">title</span><span class="p">(</span><span class="sh">'</span><span class="s">Random Data Line Graph - custom style</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">plt</span><span class="p">.</span><span class="nf">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/matplotlibstyle/styles_files/styles_27_0.png?raw=true" alt="png" /></p>
+
+<p>There are several other repos that include style libraries that you can explore and that are available on PyPi.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>As we have seen, Matplotlib provides a lot of scope for customising your plots. You can use one of the variety of built-in styles, you can modify the styles by changing the <code class="language-plaintext highlighter-rouge">rcParams</code>, make your own stylesheet to replace or modify existing ones, or you can find and install style packages from PyPi.</p>
+
+<p>Matplotlib is a very flexible and powerful plotting library and the ability to change styles means you can create your own brand or house style. Also because many other plotting libraries are based on Matplotlib, these techniques can be used with those libraries, too.</p>
+
+<hr />
+<p>As always, thanks for reading and I hope you found this useful. If you’d like to know when I publish other articles, please follow me on <a href="https://medium.com/@alan-jones/subscribe">Medium</a> or <a href="linkedin.com/in/alan-jones-032699100">LinkedIn</a>.</p>
+
+      </div>
+
+    </div>
+    <div class="col-sm-3">
+      Sponsored content<!--ads etc here -->
+<!-- streamlit from scratch-->
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+    <!--style="background-image: url('https://github.com/alanjones2/streamlitfromscratch/blob/main/sfsimage.png?raw=true');background-size: cover;"-->
+    
+    <div>
+        <!--<img class="mr-3" src="" width='80%' height='auto' alt="">-->
+        <h2>
+            <a href="https://alanjones2.github.io/streamlitfromscratch/" target="_blank">
+                <span style="color:navy">Streamlit from Scratch</span>
+            </a>
+        </h2>
+        <p class="lead" style="color: navy;"><b>Streamlit</b> is a framework for creating Data Science apps in Python.
+            <br />
+            <b>Streamlit from Scratch</b> will take from building a simple we page through to creating fully functional
+            interactive data dashboards.
+        </p>
+
+    </div>
+</div>
+<!--
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+
+    <i>eBook</i>
+    <h2><a href='https://alanjones.gumroad.com/l/auiws' target='_blank'><span style="color:navy">Plotting with
+                Pandas</span></a>
+    </h2>
+    <p class="lead" style="color: navy;">
+        <b>Plotting with Pandas: an Introduction to Data Visualization</b> is an ebook that covers basic and
+        statistical plots using Python and Pandas, line and bar charts, scatter plots, pie charts,
+        histograms, box plots, etc.
+    </p>
+</div>
+-->
+
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+    <h3>Recommended books</h3>
+    <hr/>
+    <h4><span style="color:navy">Alberto Cairo</span></h4>
+    Alberto Cairo is the Knight Chair in Visual Journalism at the University of Miami (UM), 
+    and has written excellent books about Data Visualization. Here are two of my favourites:
+    <div>
+    <a href="https://amzn.to/3Qd3sH7" target="_blank">
+        How Charts Lie: Getting Smarter about Visual Information</a>
+    </div>
+    <div>
+    <a href="https://amzn.to/40PQYdv" target="_blank">
+        The Art of Insight: How Great Visualization Designers Think</a>
+        <br/>
+    </div>
+    <div>
+    <hr/>
+    <h4><span style="color:navy">Cole Nussbaumer Knaflic</span></h4>
+    Cole Nussbaumer Knaflic tells stories with data. She is founder and CEO of storytelling with 
+    data (SWD).  SWD's well-regarded workshops 
+    and presentations are highly sought after by data-minded individuals, companies, 
+    and philanthropic organizations all over the world. 
+    Here is her most famous book:
+    </div>
+    <div>
+    <a href="https://amzn.to/3QcnUb6" target="_blank">
+        Storytelling with Data: A Data Visualization Guide for Business Professionals</a>
+    </div>
+</div>
+
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+</div></div>
+<div>
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+        kofiWidgetOverlay.draw('alan_jones', {
+            'type': 'floating-chat',
+            'floating-chat.donateButton.text': 'Buy a coffee',
+            'floating-chat.donateButton.background-color': '#5bc0de',
+            'floating-chat.donateButton.text-color': '#323842'
+        });
+    </script>
+</div></div><a class="u-url" href="/2025/02/23/matplotlib-styles.html" hidden></a>
+</article>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+  </body>
+
+</html>
