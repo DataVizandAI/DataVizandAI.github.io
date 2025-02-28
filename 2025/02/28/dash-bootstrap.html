@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="/assets/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Data Visualization, Data Science and AI" /></head>
+<body class="container" style="background-color:ghostwhite;"><header><!--</header> class="site-header" role="banner" style="background-color: white">-->
+  <div class="wrapper mb-2"><a class="site-title" style="font-size: larger;" rel="author" href="https://datavizandai.github.io">Data Visualization, Data Science and AI</a>
+    <a class="site-nav" rel="author" href="/about">About</a>
+  </div>
+</header><main class="container" aria-label="Content">
+      <div >
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Data Visualization with Dash and Bootstrap Components</h1>
+    <h3>A simple data dashboard in pure Python</h3>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-02-28T00:00:00+01:00" itemprop="datePublished">Feb 28, 2025
+      </time></p>
+  </header>
+
+  <!-- Google Analytics-->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VDYY6RYRK1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+
+      gtag('config', 'G-VDYY6RYRK1');
+  </script>
+
+  <div class="row">
+    <div class="col-sm-9">
+      <div class="post-content e-content" itemprop="articleBody">
+        <p><img src="https://github.com/DataVizandAI/public_code/blob/main/dash-bootstrap/images/app-screenshot.png?raw=true" alt="app screenshot" /></p>
+
+<p>I’ve been ignoring Dash for years, preferring to use a combination of Flask and HTML. My argument was that if you need to create your user interface in HTML (which you kind of have to in Dash), then why not go the whole hog and actually write it in HTML? <a href="https://medium.com/towards-data-science/flapjax-data-visualization-on-the-web-with-plotly-and-flask-465090fa3fba">As I wrote here, it’s not so difficult</a>.</p>
+
+<p>Anyway, then along came Streamlit, which made things easier.</p>
+
+<p>But I occasionally got a bit annoyed with Streamlit - it is too easy to mix the UI with the rest of the code, and if you aren’t careful, it can be a mess.</p>
+
+<p>So I started looking at other platforms, <a href="https://medium.com/towards-data-science/a-data-dashboard-in-pure-python-with-taipy-bdb164a62b8b">Taipy</a> and <a href="https://medium.com/towards-data-science/hands-on-data-visualization-with-google-mesop-bdde37ef09da">Mesop</a>, for example - both of these nicely separate the program logic from the UI. Much less messy, but designing the UI on these platforms was much closer to writing HTML in Python - my original bugbear with Dash.</p>
+
+<p>So, belatedly, I decided it was time to take another look at Dash. Also belatedly, I found that I could use my favourite Bootstrap components with it (I rarely write HTML without Bootstrap), and I made the app you can see above.</p>
+
+<p>It’s a simple dashboard-type app with two interactive charts (a choropleth and a bar chart) along with their controls (a drop-down menu and a slider).</p>
+
+<p>As you can see from the image, it’s not so bad!</p>
+
+<p>Well, I was fairly happy with the result, anyway. I’ve never properly engaged with Dash before, and I was quite pleased that it didn’t feel any more difficult than Streamlit (or Taipy or Mesop).</p>
+
+<p>The whole app is around 80 lines of well-spaced-out code. A fair chunk of that is to draw the choropleth, and the Dash/Bootstrap UI is only about 20 lines.</p>
+
+<p>So, let’s look at how it’s put together.</p>
+
+<h3 id="a-dash-app">A Dash app</h3>
+
+<p>A Dash app consists of four parts:</p>
+
+<ul>
+  <li>the preliminary code that sets up the app and does any data set up and so on,</li>
+  <li>the page layout, which is defined as Dash and Bootstrap components,</li>
+  <li>callbacks, which are the functions that are called in response to user interaction,</li>
+  <li>the app run command.</li>
+</ul>
+
+<p>We’ll look at all of these and how they are put together shortly, and you will find all of the code in my <a href="https://github.com/DataVizandAI/public_code/tree/main/dash-bootstrap">GitHub repo</a>.</p>
+
+<p>But first, let’s look at the way we define the page.</p>
+
+<h3 id="page-layout">Page layout</h3>
+
+<p>When deployed, a Dash app consists of two parts: the web page displayed in the browser and the code that supports it, which remains on the server. This separation is hidden; the HTML page layout, which will become the web page, is defined in the app code.</p>
+
+<p>Both Dash and Bootstrap provide us with components that get converted to HTML. Bootstrap also incorporates styles we can adopt to make our page look good and stylistically consistent.</p>
+
+<p>I have defined a default style using Bootstrap that gives every component a common look: a border, a light background, margins around the component and padding inside it. This is a single line of code (that we will see soon) that is applied to each component. The layout of the page looks like the image below. You might find the design a little fussy, but one of my aims is to demonstrate the use of Bootstrap styles, and this does the job, as we will see later.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/dash-bootstrap/images/app-layout.png?raw=true" alt="app layout" /></p>
+
+<p>There are four main components to the UI: the outer container that wraps the whole page; a header that is styled a little differently to make it stand out; and two columns that contain the charts, the user controls and some text. At the bottom of the outer container, there is a footer - just a string of text.</p>
+
+<p>In HTML, we would write this page as a set of tags, mostly <code class="language-plaintext highlighter-rouge">&lt;div&gt;</code> tags, that are nested inside each other. With Dash, we use the components provided and code the UI in Python.</p>
+
+<h3 id="a-first-dash-app-with-bootstrap-styling">A first Dash app with Bootstrap styling</h3>
+
+<p>Let’s have a quick blast through a simple Dash app that uses Bootstrap components.</p>
+
+<p>Below is the code for a very simple Dash app that uses Bootstrap styling, and below that is a screenshot of the result. We will use this as the basis of the full app.</p>
+
+<pre><code class="language-Python">from dash import Dash, html
+import dash_bootstrap_components as dbc
+
+# Initialize the Dash app with Bootstrap stylesheet
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+# Define a default CSS class for styling
+DEFAULT_CLASS = 'border border-primary rounded bg-light p-2 m-2'
+
+# Define the layout of the app
+app.layout = dbc.Container(
+    [
+        html.H1("A Bootstrap 'primary' styled header",
+        className="text-primary"),
+        html.Div("Some normal text in a 'secondary' style",
+        className='text-secondary'),
+    ], className=DEFAULT_CLASS
+)
+
+# Run the app
+if __name__ == '__main__':
+    app.run(debug=True)
+</code></pre>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/dash-bootstrap/images/simple-app.png?raw=true" alt="simple app screenshot" /></p>
+
+<p>The first couple of lines import the required libraries. If you want to follow along with the coding, you’ll probably want ot create a virtual environment and <code class="language-plaintext highlighter-rouge">pip install</code> these (or use whatever your favourite installation method is). Later, you will also need <code class="language-plaintext highlighter-rouge">plotly</code>, <code class="language-plaintext highlighter-rouge">pandas</code> and <code class="language-plaintext highlighter-rouge">numpy</code>.</p>
+
+<p>After that, the Dash app itself is created, and here we need to tell Dash that we will be using the Bootstrap themes.</p>
+
+<p>There are two aspects of the Bootstrap components: one is the component themselves (e.g. the rows and columns we’ll see later). Styles are defined as classes by Bootstrap, and we can string them together to make quite complex styles. For example, there are classes that define borders, ones that define margins and padding, and those that determine how the text and the background should look.</p>
+
+<p>As I mentioned before, I set up a default style, and that is the next line of code that you see.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">DEFAULT_CLASS</span> <span class="o">=</span> <span class="sh">'</span><span class="s">border border-primary rounded bg-light p-2 m-2</span><span class="sh">'</span>
+</code></pre></div></div>
+
+<p>The meaning of each part is as follows:</p>
+
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">border</code> - there is a border around the component</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">border-primary</code> - that is the colour of the border</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">rounded</code> - the border has rounded corners</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">bg-light</code> - the background colour</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">p-2</code> - two pixels of padding</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">m-2</code> - a two-pixel margin</p>
+  </li>
+</ul>
+
+<p>There are many,  many ways of setting up the way that Bootstrap components look. See the <a href="[Get started with Bootstrap · Bootstrap v5.3](https://getbootstrap.com/docs/5.3/getting-started/introduction/)">Bootstrap docs</a> for the full set of components and styles and the <a href="https://dash-bootstrap-components.opensource.faculty.ai/">Dash Bootstrap Components</a> for how to use them in Dash.</p>
+
+<p>We can see the usage of this default style in the first component in the layout. Because that is the next thing we come across. The <code class="language-plaintext highlighter-rouge">app.layout</code> defines how the app will look, and here we assign it to a component called <code class="language-plaintext highlighter-rouge">dbc.container</code>. This is a general-purpose container provided by Bootstrap, which contains a list of elements or other containers. At the end of that list, we can specify the style of the container, and it is here that we use the default style.</p>
+
+<p>Inside the container, there are two more elements: a header and a <em>div</em> container. The purpose of a header is self-explanatory, and a <em>div</em>  is another general-purpose container (that will create an HTML <em>&lt;div&gt;</em> tag).</p>
+
+<p>Each of these elements contains a string, which will be displayed and a <code class="language-plaintext highlighter-rouge">classname</code> which defines the style (in this case, the colour).</p>
+
+<p>The last couple of lines of code run the app, and in this case, we set the <code class="language-plaintext highlighter-rouge">debug</code> flag to <code class="language-plaintext highlighter-rouge">True</code>. This is convenient for development, as it will reload the app whenever it detects a change.</p>
+
+<p>The thing we don’t see in this app is the dynamic part - the callback functions. These are invoked when a UI component changes, and we need something to be done. We’ll get on to those later.</p>
+
+<h3 id="callbacks---adding-charts-and-controls">Callbacks - adding charts and controls</h3>
+
+<p>The final app displays charts of CO₂ emissions that come from a local CSV file.</p>
+
+<p>Our next app gets part of the way there by reading data and building a chart from it. Furthermore, it incorporates a user control (a slider) that lets the user choose the particular aspect of the data to be displayed (the year).</p>
+
+<p>This illustrates how Dash deals with user input via callback functions. These functions are linked to values in the user interface: the input that has changed and an output value that the callback will calculate from that changed input.</p>
+
+<p>Here is what our data looks like.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/dash-bootstrap/images/data.png?raw=true" alt="app layout" /></p>
+
+<p>It is a simple table that records CO₂ emissions for a country (‘Entity’) in a particular year and is sourced from <a href="https://ourworldindata.org/"><strong>Our World in Data</strong></a>.</p>
+
+<p>The application allows users to explore CO₂ emissions data over time by selecting a specific year from a slider. A <strong>choropleth map</strong> updates dynamically, displaying emissions for each country using a color scale.</p>
+
+<p>First, we import the necessary libraries - there are a couple more this time:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">dash</span> <span class="kn">import</span> <span class="n">Dash</span><span class="p">,</span> <span class="n">html</span><span class="p">,</span> <span class="n">dcc</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Input</span>
+<span class="kn">import</span> <span class="n">plotly.express</span> <span class="k">as</span> <span class="n">px</span>
+<span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="n">dash_bootstrap_components</span> <span class="k">as</span> <span class="n">dbc</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Dash and Dash Bootstrap Components (dbc)  as before.</li>
+  <li>Plotly Express (px) is used to generate the choropleth map.</li>
+  <li>Pandas loads and manipulates the CO₂ emissions dataset.</li>
+</ul>
+
+<p>As before, we create an instance of <code class="language-plaintext highlighter-rouge">Dash</code> and apply an external Bootstrap stylesheet for styling:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">app</span> <span class="o">=</span> <span class="nc">Dash</span><span class="p">(</span><span class="n">external_stylesheets</span><span class="o">=</span><span class="p">[</span><span class="n">dbc</span><span class="p">.</span><span class="n">themes</span><span class="p">.</span><span class="n">BOOTSTRAP</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>The dataset, stored in a CSV file, is loaded using Pandas. We record the minimum, maximum, and midpoint years for configuring the slider later:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span><span class="sh">"</span><span class="s">data/co2_total.csv</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">marks</span> <span class="o">=</span> <span class="p">{</span><span class="nf">int</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="nf">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">df</span><span class="p">.</span><span class="n">Year</span><span class="p">.</span><span class="nf">unique</span><span class="p">()</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">}</span>
+
+<span class="n">min_year</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">Year</span><span class="p">.</span><span class="nf">min</span><span class="p">()</span>
+<span class="n">max_year</span> <span class="o">=</span> <span class="n">df</span><span class="p">.</span><span class="n">Year</span><span class="p">.</span><span class="nf">max</span><span class="p">()</span>
+<span class="n">mid_year</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_year</span> <span class="o">+</span> <span class="n">min_year</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+</code></pre></div></div>
+
+<p>Again, we define the default layout.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">DEFAULT_CLASS</span> <span class="o">=</span> <span class="sh">'</span><span class="s">border border-primary rounded p-2 bg-light m-2</span><span class="sh">'</span>
+</code></pre></div></div>
+
+<h3 id="defining-the-layout"><strong>Defining the Layout</strong></h3>
+
+<p>As we have seen above, Dash uses a declarative layout structure and here, we organize components using Bootstrap’s <code class="language-plaintext highlighter-rouge">Container</code> and <code class="language-plaintext highlighter-rouge">Row</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">app</span><span class="p">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">dbc</span><span class="p">.</span><span class="nc">Container</span><span class="p">([</span>
+    <span class="n">html</span><span class="p">.</span><span class="nc">H1</span><span class="p">(</span><span class="sh">'</span><span class="s">Dash App with Bootstrap Components - CO₂ Emissions</span><span class="sh">'</span><span class="p">,</span> 
+             <span class="n">className</span><span class="o">=</span><span class="sh">"</span><span class="s">{DEFAULT_CLASS} text-center text-dark bg-dark-subtle</span><span class="sh">"</span><span class="p">),</span>
+    <span class="n">dbc</span><span class="p">.</span><span class="nc">Row</span><span class="p">([</span>
+        <span class="n">html</span><span class="p">.</span><span class="nc">Div</span><span class="p">(</span><span class="sh">'</span><span class="s">Global CO₂ Emissions</span><span class="sh">'</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="sh">'</span><span class="s">h3 text-danger</span><span class="sh">'</span><span class="p">),</span>
+        <span class="n">html</span><span class="p">.</span><span class="nc">Div</span><span class="p">(</span><span class="sh">"</span><span class="s">Move the slider to display CO₂ emissions by country for a specific year</span><span class="sh">"</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="sh">'</span><span class="s">text-secondary</span><span class="sh">'</span><span class="p">),</span>
+        <span class="n">dcc</span><span class="p">.</span><span class="nc">Slider</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="n">min_year</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">max_year</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">mid_year</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">marks</span><span class="o">=</span><span class="n">marks</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="sh">'</span><span class="s">slider-value</span><span class="sh">'</span><span class="p">),</span>
+        <span class="n">dcc</span><span class="p">.</span><span class="nc">Graph</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="sh">'</span><span class="s">graph2-content</span><span class="sh">'</span><span class="p">),</span>
+        <span class="n">dcc</span><span class="p">.</span><span class="nc">Markdown</span><span class="p">(</span><span class="sh">"""</span><span class="s">
+            The data used in this article is derived from Our World in Data.
+            OWD publishes articles and data about the most pressing problems that the world faces.
+            All its content is open source and its data is downloadable.
+            See [Our World in Data](https://ourworldindata.org/) for details.
+        </span><span class="sh">"""</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="sh">'</span><span class="s">text-secondary</span><span class="sh">'</span><span class="p">)</span>
+    <span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="sh">'</span><span class="s">border border-primary rounded p-2 bg-light m-2</span><span class="sh">'</span><span class="p">)</span>
+<span class="p">],</span> <span class="n">className</span><span class="o">=</span><span class="sh">"</span><span class="s">container-fluid</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="here-are-the-components-in-detail">Here are the components in detail:</h4>
+
+<ul>
+  <li>
+    <p><strong>Container</strong>: This is a a general purpose container for the whole app</p>
+  </li>
+  <li>
+    <p><strong>Title (H1)</strong>: The main heading is styled with Bootstrap classes - the text and background style from the default style are overridden.</p>
+  </li>
+  <li>
+    <p><strong>Row</strong>: by itself, a row doesn’t do anything except act as another container. The reason for using a row here is because the final app will create two columns in the row for the two graphs</p>
+  </li>
+  <li>
+    <p><strong>Divs</strong>: These are text containers that provide user guidance and context - the first is an <em>H3</em> header that is coloured red (the ‘text-danger’ class).</p>
+  </li>
+  <li>
+    <p><strong>Slider</strong>: Allows users to select a year to update the map.</p>
+  </li>
+  <li>
+    <p><strong>Graph</strong>: Displays CO₂ emissions using a choropleth map.</p>
+  </li>
+  <li>
+    <p><strong>Markdown</strong>: A markdown container can contain any valid markdown text and here provides data attribution..</p>
+  </li>
+</ul>
+
+<h2 id="creating-the-callback-for-interactivity"><strong>Creating the Callback for Interactivity</strong></h2>
+
+<p>Dash uses a <strong>callback function</strong> to update the map when the slider value changes. A callback function is preceded by the <code class="language-plaintext highlighter-rouge">@callback</code> decorator, which defines the input and output for the function. The input and output consist of two parts: the ID of a UI element and a value type. In this case, the input comes from the slider, and it is a ‘value’ (the year), while the output goes to the graph container and is a ‘figure’.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@callback</span><span class="p">(</span>
+    <span class="nc">Output</span><span class="p">(</span><span class="sh">'</span><span class="s">graph2-content</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">figure</span><span class="sh">'</span><span class="p">),</span>
+    <span class="nc">Input</span><span class="p">(</span><span class="sh">'</span><span class="s">slider-value</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">update_graph</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="sh">'</span><span class="s">Annual CO₂ emissions</span><span class="sh">'</span>
+    <span class="n">max_val</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nf">max</span><span class="p">()</span>
+    <span class="n">min_val</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">].</span><span class="nf">min</span><span class="p">()</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="p">.</span><span class="nf">choropleth</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="sh">'</span><span class="s">Year</span><span class="sh">'</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">],</span>
+        <span class="n">locations</span><span class="o">=</span><span class="sh">"</span><span class="s">Code</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># Country ISO codes
+</span>        <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>  <span class="c1"># CO₂ emissions data
+</span>        <span class="n">hover_name</span><span class="o">=</span><span class="sh">"</span><span class="s">Entity</span><span class="sh">"</span><span class="p">,</span>  <span class="c1"># Country name
+</span>        <span class="n">range_color</span><span class="o">=</span><span class="p">(</span><span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">),</span>
+        <span class="n">scope</span><span class="o">=</span><span class="sh">'</span><span class="s">world</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">projection</span><span class="o">=</span><span class="sh">'</span><span class="s">equirectangular</span><span class="sh">'</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="sh">"</span><span class="s">CO₂ Emissions by Country in </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">color_continuous_scale</span><span class="o">=</span><span class="n">px</span><span class="p">.</span><span class="n">colors</span><span class="p">.</span><span class="n">sequential</span><span class="p">.</span><span class="n">Reds</span>
+    <span class="p">)</span>
+
+    <span class="n">fig</span><span class="p">.</span><span class="nf">update_layout</span><span class="p">(</span>
+        <span class="n">margin</span><span class="o">=</span><span class="nf">dict</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">coloraxis_colorbar</span><span class="o">=</span><span class="nf">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Tonnes</span><span class="sh">"</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
+</code></pre></div></div>
+
+<p>The function is quite simple: it listens for changes in the slider value and draws a Plotly choropleth with the dataframe filtered by <code class="language-plaintext highlighter-rouge">value</code> which is the year selected by the slider. The updated figure is returned to the graph component.</p>
+
+<p>Finally, we start the Dash server to launch the app.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">'</span><span class="s">__main__</span><span class="sh">'</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The result can be seen in the screenshot below.</p>
+
+<p><img src="https://github.com/DataVizandAI/public_code/blob/main/dash-bootstrap/images/choropleth-app.png?raw=true" alt="app layout" /></p>
+
+<p>That is all you need to know to create the complete app, so I won’t go into great detail more here (the complete code is in my <a href="[public_code/dash-bootstrap at main · DataVizandAI/public_code · GitHub](https://github.com/DataVizandAI/public_code/tree/main/dash-bootstrap)">GitHub</a> repo and the README file will give you details of which file is which, so please visit that).</p>
+
+<p>Below is the code that changes in the UI. You can see that we add two columns to the original row, and the second column contains code very similar to the first. In this column, a bar chart will be drawn, and the input is from a drop-down menu that contains a list of countries.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>        <span class="n">dbc</span><span class="p">.</span><span class="nc">Row</span><span class="p">([</span>
+            <span class="n">dbc</span><span class="p">.</span><span class="nc">Col</span><span class="p">(</span> <span class="c1"># ...the original row content
+</span>            <span class="p">),</span>
+            <span class="n">dbc</span><span class="p">.</span><span class="nc">Col</span><span class="p">([</span>
+                <span class="n">html</span><span class="p">.</span><span class="nc">Div</span><span class="p">(</span><span class="sh">'</span><span class="s">Total CO₂ Emissions</span><span class="sh">'</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="sh">'</span><span class="s">h3 text-danger</span><span class="sh">'</span><span class="p">),</span>
+                <span class="n">html</span><span class="p">.</span><span class="nc">Div</span><span class="p">(</span><span class="sh">"</span><span class="s">Choose a country to display the CO₂ emissions over time</span><span class="sh">"</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="sh">'</span><span class="s">text-secondary</span><span class="sh">'</span><span class="p">),</span>
+                <span class="n">dcc</span><span class="p">.</span><span class="nc">Dropdown</span><span class="p">(</span><span class="n">df</span><span class="p">.</span><span class="n">Entity</span><span class="p">.</span><span class="nf">unique</span><span class="p">(),</span> <span class="sh">'</span><span class="s">Canada</span><span class="sh">'</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="sh">'</span><span class="s">dropdown-selection</span><span class="sh">'</span><span class="p">),</span>
+                <span class="n">dcc</span><span class="p">.</span><span class="nc">Graph</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="sh">'</span><span class="s">graph-content</span><span class="sh">'</span><span class="p">),</span>
+                <span class="p">],</span>
+                <span class="n">className</span><span class="o">=</span> <span class="n">DEFAULT_CLASS</span>
+            <span class="p">),</span>
+        <span class="p">]),</span>
+</code></pre></div></div>
+
+<p>To cater for this new chart, we need another callback function.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@callback</span><span class="p">(</span>
+    <span class="nc">Output</span><span class="p">(</span><span class="sh">'</span><span class="s">graph-content</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">figure</span><span class="sh">'</span><span class="p">),</span>
+    <span class="nc">Input</span><span class="p">(</span><span class="sh">'</span><span class="s">dropdown-selection</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">value</span><span class="sh">'</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">update_graph</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="n">dff</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">.</span><span class="n">Entity</span><span class="o">==</span><span class="n">value</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">px</span><span class="p">.</span><span class="nf">bar</span><span class="p">(</span><span class="n">dff</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="sh">'</span><span class="s">Year</span><span class="sh">'</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="sh">'</span><span class="s">Annual CO₂ emissions</span><span class="sh">'</span><span class="p">,</span> 
+                  <span class="n">template</span><span class="o">=</span><span class="sh">'</span><span class="s">plotly_white</span><span class="sh">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This simple function takes the value from the drop-down menu (the country) and plots a bar chart of emissions over time and returns the updated figure to the graph container with the ID ‘graph-content’.</p>
+
+<h2 id="conclusion"><strong>Conclusion</strong></h2>
+
+<p>In this tutorial, we built a Dash web application that visualizes CO₂ emissions using a choropleth map. We integrated Bootstrap components to enhance the layout.</p>
+
+<p>Is this easier than Streamlit? You’ll probably think it is more in line with the way that Taipy or Mesop work, but which is the easiest method? This, at least to some extent, is down to personal preference.</p>
+
+<p>I’ve used the open-source version of Dash here - there is an Enterprise version which provides you with tools to make developing and deploying sophisticated apps easier. I’ve no idea how much it costs.</p>
+
+<p>This was, in the main, an exercise to help me make my mind up which data visualisation framework I prefer, and I have to report that I still don’t think I am any the wiser. Perhaps you are. I’d very much like to hear what you think.</p>
+
+<hr />
+
+<p>Thanks for reading, and I hope this was useful. If you would like to read more of my stuff, most of it is on <a href="https://medium.com/@alan-jones">Medium</a> and also on my <a href="https://datavizandai.github.io/">website</a> (if you aren’t a Medium member). I also maintain a <a href="technofle.substack.com">Substack</a> where I post when I publish something new.</p>
+
+<p>Here are some useful links:</p>
+
+<ul>
+  <li>
+    <p><a href="https://dash.plotly.com/">Dash (open source docs)</a></p>
+  </li>
+  <li>
+    <p><a href="https://dash-bootstrap-components.opensource.faculty.ai/">Dash Bootstrap Components</a></p>
+  </li>
+  <li>
+    <p><a href="https://ourworldindata.org/">Our World in Data</a></p>
+  </li>
+  <li>
+    <p><a href="[public_code/dash-bootstrap at main · DataVizandAI/public_code · GitHub](https://github.com/DataVizandAI/public_code/tree/main/dash-bootstrap)">The repo for this code</a>.</p>
+  </li>
+</ul>
+
+<hr />
+
+<p><em>All images are by me, the author, unless otherwise indicated</em></p>
+
+<p><em>I am not connected with any of the companies mentioned in this article except as a user of their products</em></p>
+
+      </div>
+
+    </div>
+    <div class="col-sm-3">
+      Sponsored content<!--ads etc here -->
+<!-- streamlit from scratch-->
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+    <!--style="background-image: url('https://github.com/alanjones2/streamlitfromscratch/blob/main/sfsimage.png?raw=true');background-size: cover;"-->
+    
+    <div>
+        <!--<img class="mr-3" src="" width='80%' height='auto' alt="">-->
+        <h2>
+            <a href="https://alanjones2.github.io/streamlitfromscratch/" target="_blank">
+                <span style="color:navy">Streamlit from Scratch</span>
+            </a>
+        </h2>
+        <p class="lead" style="color: navy;"><b>Streamlit</b> is a framework for creating Data Science apps in Python.
+            <br />
+            <b>Streamlit from Scratch</b> will take from building a simple we page through to creating fully functional
+            interactive data dashboards.
+        </p>
+
+    </div>
+</div>
+<!--
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+
+    <i>eBook</i>
+    <h2><a href='https://alanjones.gumroad.com/l/auiws' target='_blank'><span style="color:navy">Plotting with
+                Pandas</span></a>
+    </h2>
+    <p class="lead" style="color: navy;">
+        <b>Plotting with Pandas: an Introduction to Data Visualization</b> is an ebook that covers basic and
+        statistical plots using Python and Pandas, line and bar charts, scatter plots, pie charts,
+        histograms, box plots, etc.
+    </p>
+</div>
+-->
+
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+    <h3>Recommended books</h3>
+    <hr/>
+    <h4><span style="color:navy">Alberto Cairo</span></h4>
+    Alberto Cairo is the Knight Chair in Visual Journalism at the University of Miami (UM), 
+    and has written excellent books about Data Visualization. Here are two of my favourites:
+    <div>
+    <a href="https://amzn.to/3Qd3sH7" target="_blank">
+        How Charts Lie: Getting Smarter about Visual Information</a>
+    </div>
+    <div>
+    <a href="https://amzn.to/40PQYdv" target="_blank">
+        The Art of Insight: How Great Visualization Designers Think</a>
+        <br/>
+    </div>
+    <div>
+    <hr/>
+    <h4><span style="color:navy">Cole Nussbaumer Knaflic</span></h4>
+    Cole Nussbaumer Knaflic tells stories with data. She is founder and CEO of storytelling with 
+    data (SWD).  SWD's well-regarded workshops 
+    and presentations are highly sought after by data-minded individuals, companies, 
+    and philanthropic organizations all over the world. 
+    Here is her most famous book:
+    </div>
+    <div>
+    <a href="https://amzn.to/3QcnUb6" target="_blank">
+        Storytelling with Data: A Data Visualization Guide for Business Professionals</a>
+    </div>
+</div>
+
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+</div></div>
+<div>
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+        kofiWidgetOverlay.draw('alan_jones', {
+            'type': 'floating-chat',
+            'floating-chat.donateButton.text': 'Buy a coffee',
+            'floating-chat.donateButton.background-color': '#5bc0de',
+            'floating-chat.donateButton.text-color': '#323842'
+        });
+    </script>
+</div></div><a class="u-url" href="/2025/02/28/dash-bootstrap.html" hidden></a>
+</article>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+  </body>
+
+</html>
