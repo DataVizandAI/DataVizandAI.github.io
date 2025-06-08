@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="/assets/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Data Visualization, Data Science and AI" /></head>
+<body class="container" style="background-color:ghostwhite;"><header class="site-header mb-4" role="banner" style="background-color: white">
+  <div><!--</div> class="wrapper mb-2">--><a class="" style="text-decoration:none;font-size: larger;" rel="author" href="https://datavizandai.github.io"><!--Data Visualization, Data Science and AI</a>-->
+      <div class="p-4" style="background-image: url('/assets/images/bg.png');color:white;opacity:0.8">
+  <h1 >Data Visualization, Data Science and AI
+    <span style="font-size:25%;font-weight:lighter">by&nbsp; </span> 
+    <span class="text-secondary" style="font-size:50%;font-weight: bolder;"> Alan
+        <span style="font-weight:lighter">Jones</span>
+    </span>
+</h1>
+
+<p style="font-size:90%">Data Visualization and AI apps for the web using Streamlit, Plotly, Python and Flask. See the articles/tutorials, below - many have the example code on Github.</p>
+</div>      
+<!--<a class="site-nav" rel="author" href="/about">About</a>-->
+
+    </a>
+</header><main class="container" aria-label="Content">
+      <div >
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Structured Outputs for Consistent LLM Responses</h1>
+    <h3>Stop being driven crazy by inconsistent responses</h3>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2025-04-06T00:00:00+02:00" itemprop="datePublished">Apr 6, 2025
+      </time></p>
+  </header>
+
+  <!-- Google Analytics-->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VDYY6RYRK1"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+
+      gtag('config', 'G-VDYY6RYRK1');
+  </script>
+
+  <div class="row">
+    <div class="col-sm-9">
+      <div class="post-content e-content" itemprop="articleBody">
+        <p><img src="https://github.com/DataVizandAI/public_code/blob/main/structured-outputs/images/structure.png?raw=true" alt="" /></p>
+
+<p>Neat structures — Photo by <a href="https://unsplash.com/@johnjac?utm_source=medium&amp;utm_medium=referral">John Jackson</a> on <a href="https://unsplash.com?utm_source=medium&amp;utm_medium=referral">Unsplash</a></p>
+
+<p>Ask an LLM a well-put question and the likelihood is that you will get a sensible answer. Ask the same question again, though, and you might get an equally sensible but slightly different answer.</p>
+
+<p>For example, I was trying to get an API to write executable code, and it turned out to be a challenge because no matter how many times and in how many places I told it not to, once in a while, it would put Markdown-style fencing around the code, making it syntactically wrong. (OK, it’s not too much of a problem filtering them out, but still…)</p>
+
+<p>The responses from an LLM vary because there is always some randomness in processing the result. When using an API, you can reduce this with the ‘temperature’ setting, but, nevertheless, there will always be some variation.</p>
+
+<p>If you are a human talking to ChatGPT, Gemini, Claude, etc., then this won’t matter. If the wording of the response is a bit different or the layout has changed, you still understand.</p>
+
+<p>But if you are a computer program tuned to process one type of response, then even a slight variation may cause an error.</p>
+
+<p>The solution is to use structured outputs to guarantee a consistent result.</p>
+
+<p>We are going to look at how to create structured outputs using <a href="https://ai.pydantic.dev/">PydanticAI</a> and apply them to a couple of use cases. First, we’ll see how structured outputs work, and then we’ll process unstructured data into a structured format that can be used programmatically. We’ll also see how we can generate runnable code reliably.</p>
+
+<p>Why PydanticAI?</p>
+
+<p>First, it’s open source and easy to use. And second, it is model-neutral: you can use it with several different LLMs (unlike OpenAI’s structured outputs, for example, that only work with their API).</p>
+
+<h4 id="why-use-structured-outputs-from-an-llm">Why Use Structured Outputs from an LLM</h4>
+
+<p>There are several benefits in using structured outputs over conventional responses, for example:</p>
+
+<ul>
+  <li>
+    <p>Reliability is improved— enforcing a predictable format will ensure the LLM response is consistent, and no complex parsing of the LLM response is required</p>
+  </li>
+  <li>
+    <p>Integration is easier — elements of a structured response can be used directly in an application or more easily processed into a required format</p>
+  </li>
+  <li>
+    <p>Development is faster — less code is required, and testing is less complex</p>
+  </li>
+</ul>
+
+<p>Altogether, if you aim to use LLM responses in an application, structured outputs make life more straightforward.</p>
+
+<h4 id="what-does-a-structured-output-look-like">What does a structured output look like</h4>
+
+<p>Typically, we are talking about JSON-like responses with specified fields and types. Such a structure can be easily used directly in a Python program as an array or dictionary, or may be converted into a Pandas dataframe or other data structure.</p>
+
+<p>Take a look at the following message from a customer and the prompt.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>complaint = """Hi, this is Jane. My internet has been down for two days 
+               and I'm very upset."""
+
+prompt = f"""
+Extract the following information from the customer complaint:
+
+Customer Name, Issue Category, Sentiment, Urgency.
+
+Return your answer as a JSON object.
+{complaint}
+"""
+</code></pre></div></div>
+
+<p>We’re asking the LLM to analyse the customer complaint and produce a JSON response that will look something like the following.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+  "customer_name": "Jane",
+  "issue_category": "Connectivity",
+  "sentiment": "Frustrated",
+  "urgency": "High"
+}
+</code></pre></div></div>
+
+<p>In this experiment, we will specify the structured output format a little more formally than this, and since the framework we are using is PydanticAI, it won’t be any surprise that we use Pydantic to define the output structure.</p>
+
+<h4 id="pydanticai">PydanticAI</h4>
+
+<p>PydanticAI is a fairly new framework for constructing AI agents. It’s MIT-licensed and pretty easy to use.</p>
+
+<p>The following code is in the form of Jupyter Notebook cells, but you ought to be able to construct a plain old Python file from it, too. I’ll pop a link to the source code at the end of the article.</p>
+
+<p>First things first, we need to import the Pydantic library, and so that it doesn’t interfere with the Jupyter runtime, we need to import <code class="language-plaintext highlighter-rouge">nest_asyncio</code> and run the <code class="language-plaintext highlighter-rouge">apply</code> method. You won’t need this in a plain Python program.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from pydantic_ai import Agent
+import nest_asyncio
+nest_asyncio.apply()
+</code></pre></div></div>
+
+<h4 id="simple-structured-output">Simple structured output</h4>
+
+<p>This example comes from the PydanticAI documentation. We ask a simple question, and the answer should be a city. The response should be the name of the city and the country that it is in.</p>
+
+<p>You can see in the code below that we have a very straightforward Pydantic declaration of a class <code class="language-plaintext highlighter-rouge">CityLocation</code>. It consists of two strings, one for the city name and the other for the country name.</p>
+
+<p>The agent is defined with the model type and the <code class="language-plaintext highlighter-rouge">result_type</code> set to <code class="language-plaintext highlighter-rouge">CityLocation</code> , meaning that the response must be of that type.</p>
+
+<p>We then run the agent with a query ‘Where were the olympics held in 2012?’ and print the result. This can be seen in the panel below the code.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from pydantic import BaseModel
+
+class CityLocation(BaseModel):
+    city: str
+    country: str
+
+agent = Agent('openai:gpt-4o-mini', result_type=CityLocation)
+result = agent.run_sync('Where were the olympics held in 2012?')
+print(result.data)
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>city='London' country='United Kingdom'
+</code></pre></div></div>
+
+<p>We could ask any question where the result is a city and receive a response in the same format. But what if the question does not produce a valid output? This could be due to an error in the LLM processing or because it is simply impossible to provide a suitable response to the question given.</p>
+
+<p>In the case of an LLM failure, you probably need to validate the response against the Pydantic model and retry the query. There is a whole section on validation in the <a href="https://ai.pydantic.dev/results/#streaming-structured-responses">PydanticAI documents</a> that deals with this, and it would take another article to deal with it, so I won’t go into it here.</p>
+
+<p>However, when a valid answer isn’t possible, a simple strategy is to ask the LLM to fill in fields in the response that indicate whether a response is valid or not, e.g.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from pydantic import BaseModel
+
+class CityLocation(BaseModel):
+    city: str
+    country: str
+    valid: bool = True
+    error: str = None
+
+prompt = """If the answer is not a city, 
+            return empty strings for the city and country, 
+            return valid=False and an error message."""
+agent = Agent('openai:gpt-4o-mini', 
+              result_type=CityLocation, 
+              system_prompt=prompt)
+</code></pre></div></div>
+
+<p>Here are a couple of queries, one bad, the other good:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>result = agent.run_sync('What is a fish?')
+print(result.data)
+
+result = agent.run_sync('In what city was the soccer world cup final last played?')
+print(result.data)
+</code></pre></div></div>
+
+<p>And the results:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>city='' country='' valid=False error='The answer provided is not a city.'
+city='Lusail' country='Qatar' valid=True error=None
+</code></pre></div></div>
+
+<p>So, that’s how to get structured outputs from an LLM. Let’s take a look at a couple of practical examples that might form part of an application.</p>
+
+<p>We’ll first look at how we can transform unstructured customer feedback into a form that we can load into a Pandas dataframe for processing, and then we’ll see how we can generate runnable Python code.</p>
+
+<h3 id="structured-customer-feedback">Structured customer feedback</h3>
+
+<p>I’m going to use fictitious customer feedback similar to my AI for BI article <a href="https://medium.com/data-science/transform-customer-feedback-into-actionable-insights-with-crewai-and-streamlit-06b6f482f5ae"><em>Transform Customer Feedback into Actionable Insights with CrewAI and Streamlit</em></a><em>.</em> It is a set of ratings and comments about products from a made-up online shoe store.</p>
+
+<p>I’ve stored the comments in a Markdown file called <em>shoes.md,</em> and so we can read it like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fb_raw = "shoes.md"
+with open(fb_raw, 'r') as f:
+    fb = f.read()
+
+print(fb)
+</code></pre></div></div>
+
+<p>When printed, it looks like the following: a star rating and a comment about the product.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Customer feedback
+
+### CloudStrider Sneakers
+
+1. Stars: 2  
+   "The shoes were super comfortable initially, but after just two months, the sole started to peel off! Really disappointed with the durability."  
+2. Stars: 1  
+   "I ordered my usual size, but these sneakers were way too tight. Had to return them. The sizing is totally off."  
+3. Stars: 3  
+   "Great for short runs, but they hold onto odors even after washing. Not ideal for heavy use."  
+4. Stars: 5  
+   "Extremely lightweight and breathable. Perfect for casual jogging. No issues so far!"
+### PeakTrek Hikers
+1. Stars: 1  
+   "These boots claim to be waterproof, but my feet were soaked after just walking through damp grass. Not worth it."  
+2. Stars: 2  
+   "I slipped multiple times on rocky trails because the soles donâ€™t grip well on wet surfaces. Not safe for serious hikes."  
+3. Stars: 4  
+   "The boots are sturdy and provide decent ankle support, but I wish the padding was thicker for longer treks."  
+4. Stars: 5  
+   "Used these for a weekend hike in the mountains, and they held up really well. No blisters, and they felt solid."
+</code></pre></div></div>
+
+<p>I want to transform this into a structured format, and I use the following prompt:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>description=f""" 
+            Analyse '{fb}' the data provided - it is in Markdown format. 
+            The data is about the range of shoes in an online shop each with 
+            set of messages from customers giving feedback about the shoes that they have purchased.
+            """
+</code></pre></div></div>
+
+<p>This is used along with two Pydantic models: the first is the format of an individual comment, while the second defines a list of those comments. An <code class="language-plaintext highlighter-rouge">Enum</code> is used to define the possible sentiment values.</p>
+
+<p>The agent is then called using the list as the structured output definition.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from pydantic import BaseModel
+from enum import Enum
+
+class Sentiment(str, Enum):
+    negative = 'negative'
+    neutral = 'neutral'
+    positive = 'positive'
+
+class feedback_report_shoe(BaseModel):
+    product: str
+    overall_rating: int  
+    issue: str 
+    review: str
+    sentiment: Sentiment
+
+class feedback_report(BaseModel):
+    feedback: list[feedback_report_shoe]
+
+agent = Agent('openai:gpt-4o-mini', result_type=feedback_report)
+result = agent.run_sync(description)
+</code></pre></div></div>
+
+<p>The result, in JSON format, can be seen using the following print statement.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>print(result.data.model_dump_json(indent=2))
+</code></pre></div></div>
+
+<p>And here is a sample of that output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+  "feedback": [
+    {
+      "product": "CloudStrider Sneakers",
+      "overall_rating": 2,
+      "issue": "Durability",
+      "review": "The shoes were super comfortable initially, but after just two months, the sole started to peel off! Really disappointed with the durability.",
+      "sentiment": "negative"
+    },
+    {
+      "product": "CloudStrider Sneakers",
+      "overall_rating": 1,
+      "issue": "Sizing",
+      "review": "I ordered my usual size, but these sneakers were way too tight. Had to return them. The sizing is totally off.",
+      "sentiment": "negative"
+    }
+...
+
+  ]
+}
+</code></pre></div></div>
+
+<p>Now that we have a nicely structured output, we can easily convert it into a dataframe for further processing.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import pandas as pd
+df = pd.DataFrame([dict(f) for f in result.data.feedback])
+df['sentiment'] = df['sentiment'].apply(lambda x: x.value)
+df
+</code></pre></div></div>
+
+<p>This code will give us the dataframe illustrated below.</p>
+
+<p><img src="https://substackcdn.com/image/fetch/w_1456,c_limit,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fece3f1b4-31ce-4ccf-8069-f79d0d062b6c_880x581.png" alt="" /></p>
+
+<p>We can process the data further, for example, ranking the products according to their star rating.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>average_ratings = df.groupby('product')['overall_rating'].mean()
+average_ratings = average_ratings.sort_values(ascending=False)
+print(average_ratings)
+</code></pre></div></div>
+
+<p>We first grouped the products, calculated the mean of the rating and then sorted them.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BounceMax Runners        4.75
+EcoStep Slip-Ons         4.50
+LuxeLace Oxfords         4.50
+PeakTrek Hikers          3.00
+CloudStrider Sneakers    2.75
+SwiftShine Heels         2.50
+</code></pre></div></div>
+
+<p>In this example, getting the LLM to structure the data makes it easy for us to process it. Now, let’s look at my code generation problem.</p>
+
+<h4 id="unstructured-code-generation">Unstructured code generation</h4>
+
+<p>LLMs are quite proficient at producing code, but, as I discussed earlier, getting them to produce something consistent and usable is slightly trickier.</p>
+
+<p>Here is a simple example of code generation. We simply asked the agent to produce a Python function to add two integers.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from pydantic_ai import Agent
+
+agent = Agent(  
+    'openai:gpt-4o-mini',
+)
+
+result = agent.run_sync("Write a Python function to add two integers"
+                        "together and give an example call")  
+print(result.data)
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Here is a simple Python function that takes two integers as input, 
+adds them together, and returns the result:
+
+```python
+def add_two_integers(a, b):
+    """
+    Add two integers together.
+
+    Parameters:
+    a (int): The first integer.
+    b (int): The second integer.
+
+    Returns:
+    int: The sum of the two integers.
+    """
+    return a + b
+
+# Example call
+result = add_two_integers(5, 3)
+print(result)  # Output: 8
+</code></pre></div></div>
+
+<p>In this example, the function <code class="language-plaintext highlighter-rouge">add_two_integers</code> is defined to take two 
+parameters, <code class="language-plaintext highlighter-rouge">a</code> and <code class="language-plaintext highlighter-rouge">b</code>. It calculates the sum of these two integers and 
+returns the result. The example call at the bottom demonstrates how to use 
+the function by adding the integers 5 and 3, resulting in an output of 8.</p>
+
+<p>The result is typical of a chat-like response and contains exactly the right information. But I cannot use the output to directly run the code because the response is targeted at a human not a computer program.</p>
+
+<h4 id="structured-code-generation">Structured code generation</h4>
+
+<p>Here is a different version with a Pydantic model defined to split the output into the code section and a commentary.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Code_Output(BaseModel):
+    code: str
+    commentary: str
+
+agent = Agent('openai:gpt-4o-mini', result_type=Code_Output)
+
+result = agent.run_sync("Write a Python function to add two integers" 
+                        "together and give an example call")  
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">code</code> part of the response contains a runnable function — no additional information or Markdown fencing, just the code.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>print(result.data.code)
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def add_two_integers(a, b):
+    """
+    This function takes two integers and returns their sum.
+    """
+    return a + b
+</code></pre></div></div>
+
+<p>And the commentary contains the rest of the output.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>print(result.data.commentary)
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Example call
+
+result = add_two_integers(5, 3)
+print(result)  # Output: 8
+
+The function 'add_two_integers' is defined to take two integers as parameters 
+and return their sum. An example call is provided where the function is 
+called with the integers 5 and 3, and the result is printed.
+</code></pre></div></div>
+
+<p>We can run the code easily. Here is a Notebook cell that does just that. The functional part of the cell is just <code class="language-plaintext highlighter-rouge">exec(result.data.code)</code>. The rest of the code ensures that the user can review the code and is warned that running it could cause problems. It is a bad idea to run LLM-generated code unseen unless it is in a sandbox environment such as Docker. LLMs make errors and while it is unlikely that a function to add two integers will cause any harm, we should still check.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import ipywidgets as widgets
+
+text = widgets.HTML("&lt;h3&gt;Running the code is potentially dangerous&lt;/h3&gt;") 
+button = widgets.Button(description="Run it, anyway",
+                         button_style='danger')
+output = widgets.Output(layout={'border': '1px solid black'})
+with output:
+    print("Code result:")
+
+display(widgets.VBox([text,button, output]))
+
+def run(b):
+    with output:
+        exec(result.data.code)
+
+button.on_click(run)
+
+VBox(children=(HTML(value='&lt;h3&gt;Running the code is potentially dangerous&lt;/h3&gt;'), Button(button_style='danger',…
+</code></pre></div></div>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>Structured outputs are a useful way of ensuring consistency in an LLM’s response, as I hope these simple examples have illustrated.</p>
+
+<p>They are easily implemented in PydanticAI: simply define a Pydantic model and use that in the call to the AI agent. The result will be a data structure that is easily used in further coding.</p>
+
+<p>I haven’t properly covered what happens if the LLM does not respond as required, which is always a possibility, as this could easily be a lengthy discussion. The method that I showed above only copes with the simplest of errors, and more sophisticated error detection may well be necessary for a particular application, for example, validation against the model and retrying the query - PydanticAI discusses this in their docs.</p>
+
+<hr />
+
+<p>As ever, thanks for reading and I hope that this has been useful. To see more of my articles, follow me on <a href="https://medium.com/@alan-jones">Medium</a> or subscribe to my <a href="http://technofile.substack.com/">Substack</a>.</p>
+
+<p>The code and data for this article can be found in my GitHub repo. I will place a link to it <a href="https://github.com/DataVizandAI/public_code/tree/main/structured-outputs"><em>here</em></a> shortly after publication.</p>
+
+<hr />
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+</code></pre></div></div>
+
+      </div>
+
+    </div>
+    <div class="col-sm-3">
+      Sponsored content<!--ads etc here -->
+<!-- bookshop.org-->
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light text-dark lead" 
+style="font-weight:bold;background-image: url('https://github.com/alanjones2/streamlitfromscratch/blob/main/sfsimage.png?raw=true');background-size: cover;">
+    <h5 style="font-weight:bolder;"">Support your local bookstore</h5>
+    Find my recommended books about Data Visualisation and AI on Bookshop.org 
+    <h4>
+    <a href="https://bookshop.org/shop/alanjones" target="_blank">US</a>
+    <a href="https://uk.bookshop.org/shop/alanjones" target="_blank">UK</a>
+    </h4>
+
+</div>
+<!-- streamlit from scratch-->
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light"
+    style="background-image: url('https://github.com/alanjones2/streamlitfromscratch/blob/main/sfsimage.png?raw=true');background-size: cover;">
+    
+    <div>
+        <h5>Support your local author</h5>
+        <h2>
+            <a href="https://alanjones2.github.io/streamlitfromscratch/" target="_blank">
+                <span style="color:navy">Streamlit from Scratch</span>
+            </a>
+        </h2>
+        <p class="lead" style="color: navy;"><b>Streamlit</b> is a framework for creating Data Science apps in Python.
+            <br />
+            <b>Streamlit from Scratch</b> will take from building a simple we page through to creating fully functional
+            interactive data dashboards.
+        </p>
+
+    </div>
+</div>
+<!--
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+
+    <i>eBook</i>
+    <h2><a href='https://alanjones.gumroad.com/l/auiws' target='_blank'><span style="color:navy">Plotting with
+                Pandas</span></a>
+    </h2>
+    <p class="lead" style="color: navy;">
+        <b>Plotting with Pandas: an Introduction to Data Visualization</b> is an ebook that covers basic and
+        statistical plots using Python and Pandas, line and bar charts, scatter plots, pie charts,
+        histograms, box plots, etc.
+    </p>
+</div>
+-->
+
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+    
+    <h5>Support a global billionaire</h5>
+    <h3>Recommended books from Amazon</h3>
+    <hr/>
+    <h4><span style="color:navy">Alberto Cairo</span></h4>
+    Alberto Cairo is the Knight Chair in Visual Journalism at the University of Miami (UM), 
+    and has written excellent books about Data Visualization. Here are two of my favourites:
+    <div>
+    <a href="https://amzn.to/3Qd3sH7" target="_blank">
+        How Charts Lie: Getting Smarter about Visual Information</a>
+    </div>
+    <div>
+    <a href="https://amzn.to/40PQYdv" target="_blank">
+        The Art of Insight: How Great Visualization Designers Think</a>
+        <br/>
+    </div>
+    <div>
+    <hr/>
+    <h4><span style="color:navy">Cole Nussbaumer Knaflic</span></h4>
+    Cole Nussbaumer Knaflic tells stories with data. She is founder and CEO of storytelling with 
+    data (SWD).  SWD's well-regarded workshops 
+    and presentations are highly sought after by data-minded individuals, companies, 
+    and philanthropic organizations all over the world. 
+    Here is her most famous book:
+    </div>
+    <div>
+    <a href="https://amzn.to/3QcnUb6" target="_blank">
+        Storytelling with Data: A Data Visualization Guide for Business Professionals</a>
+    </div>
+</div>
+
+<div class="p-4 shadow-sm mb-4 rounded border border-secondary bg-light">
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+
+<!-- google add start-->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3208991186670959"
+    crossorigin="anonymous"></script>
+<!-- sfs vertical -->
+<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3208991186670959" data-ad-slot="6617299104"
+    data-ad-format="auto" data-full-width-responsive="true"></ins>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<!-- google add end-->
+</div></div>
+<div>
+    <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+    <script>
+        kofiWidgetOverlay.draw('alan_jones', {
+            'type': 'floating-chat',
+            'floating-chat.donateButton.text': 'Buy a coffee',
+            'floating-chat.donateButton.background-color': '#5bc0de',
+            'floating-chat.donateButton.text-color': '#323842'
+        });
+    </script>
+</div></div><a class="u-url" href="/2025/04/06/structured-outputs.html" hidden></a>
+</article>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+  </body>
+
+</html>
